@@ -232,6 +232,22 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
+<!-- MIC PERMISSION MODAL — shown on first visit or when blocked -->
+<div id="micModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#0f1e38;border:2px solid rgba(255,217,61,0.3);border-radius:24px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+    <div style="font-size:56px;margin-bottom:12px;">🎙️</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:8px;">Buddy needs your mic!</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:24px;">So Buddy can hear you answer questions and talk back! Chrome will ask — just click <strong style="color:#FFD93D">Allow</strong>.</div>
+    <button onclick="requestMicPermission()" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FFD93D,#FF6B6B);color:#0a1228;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;margin-bottom:10px;">
+      ✅ Allow Microphone
+    </button>
+    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
+      Skip — I'll type instead
+    </button>
+    <div id="micModalStatus" style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.4);min-height:16px;"></div>
+  </div>
+</div>
+
 <div class="live-t" id="liveT"><div class="lt-lbl">You said</div><div id="ltText">…</div></div>
 
 <script>
@@ -667,46 +683,252 @@ function speakText(text,onEnd){
   },80);
 }
 
-// SPEECH-TO-SPEECH
-function toggleListen(){
-  if(isListening){stopListen();}
-  else{startListen();}
-}
-function startListen(){
-  if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){
-    if(mode!=='chat')showChatPanel();
-    addChatMsg('Speech input needs Chrome! Use text below instead.','b');return;
+// ═══════════════════════════════════════════════════
+//  MIC PERMISSION — prime via getUserMedia first
+//  This is the correct way to trigger Chrome's
+//  permission popup reliably on HTTPS pages
+// ═══════════════════════════════════════════════════
+
+let micPermissionGranted = false;
+
+// Show the modal on load unless already granted
+async function initMicPermission(){
+  // Check if already granted
+  if(navigator.permissions){
+    try{
+      const s = await navigator.permissions.query({name:'microphone'});
+      if(s.state === 'granted'){
+        micPermissionGranted = true;
+        hideMicModal();
+        return;
+      }
+      if(s.state === 'denied'){
+        // Already permanently blocked — show modal with fix instructions
+        showBlockedInstructions();
+        return;
+      }
+      // state === 'prompt' — show our friendly modal first
+      showMicModal();
+      return;
+    } catch(e){}
   }
-  speechSynthesis.cancel();
-  setState('listening');isListening=true;
-  let gotResult=false; // ← flag to prevent onend firing before onresult
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recog=new SR();
-  recog.continuous=false;
-  recog.interimResults=true;
-  recog.lang='en-US';
-  recog.onresult=e=>{
-    let interim='',final='';
-    for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript;}
-    showLiveT(final||interim);
-    if(final){
-      gotResult=true;
-      stopListen();
-      handleVoiceInput(final.trim());
-    }
-  };
-  recog.onerror=e=>{
-    console.warn('Mic error:',e.error);
-    stopListen();
-    if(e.error==='not-allowed') addChatMsg('Microphone blocked! Please allow mic access and try again. 🎙️','b');
-  };
-  recog.onend=()=>{
-    // Only stop if we didn't already handle a result (prevents race condition)
-    if(!gotResult && isListening) stopListen();
-  };
-  recog.start();
+  // Permissions API not available — show modal to be safe
+  showMicModal();
 }
-function stopListen(){isListening=false;if(recog){recog.stop();recog=null;}showLiveT('');if(A.state==='listening')setState('idle');}
+
+function showMicModal(){
+  document.getElementById('micModal').style.display='flex';
+}
+function hideMicModal(){
+  document.getElementById('micModal').style.display='none';
+}
+function dismissMicModal(){
+  hideMicModal();
+  micToast('💬 No problem! Use the text box to chat with Buddy.','#6BCB77');
+}
+
+function showBlockedInstructions(){
+  const modal = document.getElementById('micModal');
+  modal.style.display = 'flex';
+  modal.querySelector('div > div').innerHTML = `
+    <div style="font-size:48px;margin-bottom:12px;">🔒</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#FF6B6B;margin-bottom:10px;">Microphone is blocked</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:20px;text-align:left;">
+      Chrome remembered <strong style="color:#FFD93D">Block</strong> for this site. Fix it in 3 steps:<br><br>
+      <strong style="color:#fff">1.</strong> Click the <strong style="color:#FFD93D">🔒 lock icon</strong> in your address bar<br>
+      <strong style="color:#fff">2.</strong> Find <strong style="color:#FFD93D">Microphone</strong> → change to <strong style="color:#4ade80">Allow</strong><br>
+      <strong style="color:#fff">3.</strong> <strong style="color:#FFD93D">Refresh this page</strong>
+    </div>
+    <button onclick="location.reload()" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;margin-bottom:10px;">
+      🔄 Refresh Page
+    </button>
+    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
+      Skip — I'll type instead
+    </button>`;
+}
+
+async function requestMicPermission(){
+  const status = document.getElementById('micModalStatus');
+  status.textContent = 'Asking Chrome for permission…';
+  status.style.color = '#FFD93D';
+
+  try{
+    // getUserMedia is the ONLY reliable way to trigger Chrome's permission popup
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    // Permission granted — stop the stream immediately (we only needed the prompt)
+    stream.getTracks().forEach(t => t.stop());
+    micPermissionGranted = true;
+    status.textContent = '✅ Microphone allowed!';
+    status.style.color = '#4ade80';
+    setTimeout(hideMicModal, 800);
+  } catch(err){
+    console.warn('getUserMedia error:', err.name, err.message);
+    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
+      // User clicked Block in the popup, or it was already blocked
+      showBlockedInstructions();
+    } else if(err.name === 'NotFoundError'){
+      status.textContent = '❌ No microphone found — plug one in!';
+      status.style.color = '#FF6B6B';
+    } else {
+      status.textContent = 'Error: ' + err.message;
+      status.style.color = '#FF6B6B';
+    }
+  }
+}
+
+// Show a friendly toast message (works in any mode)
+function micToast(msg, color='#FF6B6B'){
+  let t=document.getElementById('micToast');
+  if(!t){t=document.createElement('div');t.id='micToast';
+    t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 22px;border-radius:14px;font-family:Nunito,sans-serif;font-size:13.5px;font-weight:700;color:#fff;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
+    document.body.appendChild(t);}
+  t.style.background=color;
+  t.style.opacity='1';
+  t.textContent=msg;
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0',3500);
+}
+
+function toggleListen(){
+  if(isListening){ stopListen(); return; }
+  if(!micPermissionGranted){
+    // Try to check permission state first
+    if(navigator.permissions){
+      navigator.permissions.query({name:'microphone'}).then(s=>{
+        if(s.state==='denied'){ showBlockedInstructions(); showMicModal(); }
+        else if(s.state==='prompt'){ showMicModal(); }
+        else { micPermissionGranted=true; startListen(); }
+      }).catch(()=>startListen());
+    } else {
+      startListen(); // Just try — browser will show native prompt
+    }
+    return;
+  }
+  startListen();
+}
+
+// Step 1: check permission first using Permissions API if available
+async function checkMicAndStart(){
+  // Must be HTTPS or localhost — file:// won't work
+  if(location.protocol==='file:'){
+    micToast('⚠️ Open this page via http:// or https:// — mic does not work from a file:// URL');
+    return;
+  }
+  // Check browser support
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    micToast('🎙️ Voice needs Chrome or Edge browser. Try typing below!');
+    return;
+  }
+  startListen();
+}
+
+function startListen(){
+  // Cancel any ongoing TTS so it doesn't clash with STT
+  speechSynthesis.cancel();
+  if(recog){try{recog.abort();}catch(e){} recog=null;}
+
+  setState('listening');
+  isListening=true;
+  let gotResult=false;
+  let retries=0;
+  const MAX_RETRIES=1;
+
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+  function doStart(){
+    recog=new SR();
+    recog.continuous=false;
+    recog.interimResults=true;
+    recog.lang='en-US';
+    recog.maxAlternatives=3;
+
+    recog.onstart=()=>{
+      showLiveT('Listening… speak now!');
+    };
+
+    recog.onresult=e=>{
+      let interim='',final='';
+      for(const r of e.results){
+        if(r.isFinal) final+=r[0].transcript;
+        else interim+=r[0].transcript;
+      }
+      showLiveT(final||interim);
+      if(final){
+        gotResult=true;
+        stopListen();
+        handleVoiceInput(final.trim());
+      }
+    };
+
+    recog.onspeechend=()=>{
+      // Browser detected end of speech — let onresult fire first
+      setTimeout(()=>{ if(!gotResult && recog) recog.stop(); },300);
+    };
+
+    recog.onerror=e=>{
+      console.warn('STT error:', e.error);
+      if(e.error==='no-speech'){
+        if(retries<MAX_RETRIES){
+          retries++;
+          showLiveT('I didn\'t hear you — try again!');
+          setTimeout(doStart, 400);
+          return;
+        }
+        stopListen();
+        micToast('🎙️ I didn\'t hear anything. Tap the mic and speak clearly!','#6BCB77');
+        return;
+      }
+      stopListen();
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+        micPermissionGranted=false;
+        showBlockedInstructions();
+        showMicModal();
+        return;
+      }
+      const msgs={
+        'not-found':    '🎙️ No microphone found. Plug in a mic and try again.',
+        'network':      '🌐 Network error. Check your internet connection and try again.',
+        'aborted':      '',
+        'audio-capture':'🎙️ Mic is used by another app. Close it and try again.',
+      };
+      const msg=msgs[e.error];
+      if(msg) micToast(msg);
+    };
+
+    recog.onend=()=>{
+      if(!gotResult && isListening){
+        // ended without result and no error — usually means mic access was just granted
+        // try once more
+        if(retries<MAX_RETRIES){
+          retries++;
+          setTimeout(doStart,300);
+        } else {
+          stopListen();
+        }
+      }
+    };
+
+    try{ recog.start(); }
+    catch(err){
+      stopListen();
+      if(err.name==='InvalidStateError'){
+        // Already started — abort and retry
+        setTimeout(()=>{try{recog&&recog.abort();}catch(e){}recog=null;startListen();},300);
+      } else {
+        micToast('Mic error: '+err.message+'. Try refreshing the page.');
+      }
+    }
+  }
+
+  doStart();
+}
+
+function stopListen(){
+  isListening=false;
+  if(recog){try{recog.abort();}catch(e){} recog=null;}
+  showLiveT('');
+  if(A.state==='listening') setState('idle');
+}
 function showLiveT(t){const el=document.getElementById('liveT'),tx=document.getElementById('ltText');if(t){el.classList.add('show');tx.textContent=t;}else el.classList.remove('show');}
 
 async function handleVoiceInput(text){
@@ -757,9 +979,28 @@ async function handleVoiceInput(text){
   showLiveT('');
   setState('thinking');
   const lid=addChatMsg('','b','<div class="dl-wrap"><div class="dl"></div><div class="dl"></div><div class="dl"></div></div>');
+
+  // ⚠️ IMPORTANT: Replace the value below with your actual Anthropic API key
+  // Get one free at: https://console.anthropic.com
+  const API_KEY = 'Killer';
+
+  if(!API_KEY || API_KEY === 'Killer'){
+    removeMsg(lid);
+    const fb=`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
+    addChatMsg('💡 Add your Anthropic API key to the code to enable AI chat! For now: '+fb,'b');
+    speakText(fb,()=>{});
+    return;
+  }
+
   try{
     const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-iab': 'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:200,
         system:`You are Buddy, an enthusiastic friendly owl tutor for kids aged 3-8. You teach A-Z alphabets and phonics.
@@ -829,6 +1070,8 @@ if(!document.getElementById('fallStyle')){const s=document.createElement('style'
 
 // INIT
 window.addEventListener('load',()=>{
+  // Check/request mic permission on load so Chrome popup fires at right time
+  initMicPermission();
   setState('greeting');
   showLearnPanel();
   setTimeout(()=>{
@@ -839,3 +1082,5 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+
+
