@@ -234,6 +234,608 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <div class="live-t" id="liveT"><div class="lt-lbl">You said</div><div id="ltText">…</div></div>
 
-<script src="script.js"></script>
+<script>
+// ═══════════════════════════════════════════════════
+//  BUDDY CANVAS ANIMATION ENGINE
+//  Cute round character: owl-inspired, kid-friendly
+// ═══════════════════════════════════════════════════
+const cv=document.getElementById('buddyCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+const A={t:0,stT:0,state:'idle',breathY:0,headTilt:0,blinkT:0,blinkNext:150,pupX:0,pupY:0,browR:0,mOpen:0,mShape:0,phonIdx:0,phonTimer:0,waveT:0,waving:0,bounce:0,excite:0};
+const PHON=[[0,0],[.4,1],[.75,2],[.55,1],[.1,0],[.7,2],[.45,1],[.05,0],[.85,2],[.55,1],[.2,0],[.65,2]];
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+const C={
+  body:'#4a90d9',bodyD:'#2c6bb5',bodyL:'#6eb4f7',
+  belly:'#e8f4ff',
+  wing:'#3a7ac9',wingL:'#5a9ae9',
+  eye:'#fff',pupil:'#1a1a2e',
+  beak:'#FFD93D',beakD:'#e6b800',
+  blush:'rgba(255,150,120,0.3)',
+  feet:'#FFD93D',
+  star:'#FFD93D',
+};
+
+function drawBG(){
+  const g=ctx.createRadialGradient(W/2,H*.7,10,W/2,H*.4,W);
+  g.addColorStop(0,'#0f1e38');g.addColorStop(1,'#0a1228');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Stars
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  [[30,20],[80,35],[260,18],[300,40],[180,15],[50,60]].forEach(([x,y])=>{
+    ctx.beginPath();ctx.arc(x,y,1+Math.sin(A.t+x)*.5,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function drawBuddy(cx2,cy2){
+  const by=cy2+A.breathY+A.bounce;
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.2)';
+  ctx.beginPath();ctx.ellipse(cx2,by+66,38,8,0,0,Math.PI*2);ctx.fill();
+
+  // Feet
+  ctx.fillStyle=C.feet;
+  ctx.beginPath();ctx.ellipse(cx2-14,by+64,10,5,-.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx2+14,by+64,10,5,.2,0,Math.PI*2);ctx.fill();
+
+  ctx.save();
+  ctx.translate(cx2,by);
+  ctx.rotate(A.headTilt);
+
+  // Wings (animated wave when waving)
+  const wl=A.waving;
+  // Left wing
+  ctx.fillStyle=C.wing;
+  ctx.beginPath();
+  ctx.moveTo(-22,5);
+  ctx.quadraticCurveTo(-52+wl*10,-10+Math.sin(A.waveT*2)*15*wl,-48+wl*8,-30+Math.sin(A.waveT)*20*wl);
+  ctx.quadraticCurveTo(-35+wl*5,-20,-22,2);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=C.wingL;
+  ctx.beginPath();
+  ctx.moveTo(-22,5);
+  ctx.quadraticCurveTo(-46+wl*8,-8+Math.sin(A.waveT*2)*12*wl,-42+wl*6,-24+Math.sin(A.waveT)*16*wl);
+  ctx.quadraticCurveTo(-32+wl*4,-16,-22,2);
+  ctx.closePath();ctx.fill();
+
+  // Right wing
+  ctx.fillStyle=C.wing;
+  ctx.beginPath();
+  ctx.moveTo(22,5);
+  ctx.quadraticCurveTo(52,2,50,-26);
+  ctx.quadraticCurveTo(38,-16,22,2);
+  ctx.closePath();ctx.fill();
+
+  // Body
+  const bg=ctx.createRadialGradient(-8,-10,5,0,0,42);
+  bg.addColorStop(0,C.bodyL);bg.addColorStop(1,C.body);
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.ellipse(0,10,36,44,0,0,Math.PI*2);ctx.fill();
+
+  // Belly
+  const belly=ctx.createRadialGradient(0,15,5,0,15,26);
+  belly.addColorStop(0,'#ffffff');belly.addColorStop(1,C.belly);
+  ctx.fillStyle=belly;
+  ctx.beginPath();ctx.ellipse(0,18,20,26,0,0,Math.PI*2);ctx.fill();
+
+  // Head
+  const hg=ctx.createRadialGradient(-5,-30,4,0,-28,30);
+  hg.addColorStop(0,C.bodyL);hg.addColorStop(1,C.body);
+  ctx.fillStyle=hg;
+  ctx.beginPath();ctx.ellipse(0,-28,28,28,0,0,Math.PI*2);ctx.fill();
+
+  // Ear tufts
+  ctx.fillStyle=C.bodyD;
+  ctx.beginPath();ctx.moveTo(-16,-50);ctx.lineTo(-22,-62+A.excite*5);ctx.lineTo(-8,-52);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(16,-50);ctx.lineTo(22,-62+A.excite*5);ctx.lineTo(8,-52);ctx.closePath();ctx.fill();
+  ctx.fillStyle=C.bodyL;
+  ctx.beginPath();ctx.moveTo(-14,-51);ctx.lineTo(-18,-59+A.excite*4);ctx.lineTo(-8,-52);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(14,-51);ctx.lineTo(18,-59+A.excite*4);ctx.lineTo(8,-52);ctx.closePath();ctx.fill();
+
+  // Eye rings (feather rings)
+  ctx.fillStyle=C.bodyD;
+  ctx.beginPath();ctx.ellipse(-11,-28,13,13,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(11,-28,13,13,0,0,Math.PI*2);ctx.fill();
+
+  // Eyes
+  const eyeOp=1-A.blinkT;
+  ctx.fillStyle=C.eye;
+  ctx.beginPath();ctx.ellipse(-11,-28,10,10*eyeOp,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(11,-28,10,10*eyeOp,0,0,Math.PI*2);ctx.fill();
+
+  if(eyeOp>.1){
+    const px=A.pupX*.15,py=A.pupY*.15;
+    ctx.fillStyle='#1a1a2e';
+    ctx.beginPath();ctx.ellipse(-11+px,-28+py,6,6*eyeOp,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(11+px,-28+py,6,6*eyeOp,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='white';
+    ctx.beginPath();ctx.ellipse(-9+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(13+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
+  }
+  // Blink lid
+  if(A.blinkT>.05){
+    ctx.fillStyle=C.body;
+    ctx.beginPath();ctx.ellipse(-11,-28-10*(1-A.blinkT),11,11,0,Math.PI,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(11,-28-10*(1-A.blinkT),11,11,0,Math.PI,Math.PI*2);ctx.fill();
+  }
+
+  // Eyebrows
+  ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
+  const bl=A.browR*5;
+  ctx.beginPath();ctx.moveTo(-19,-40-bl);ctx.quadraticCurveTo(-11,-43-bl,-4,-40-bl*.7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(4,-40-bl*.7);ctx.quadraticCurveTo(11,-43-bl,19,-40-bl);ctx.stroke();
+
+  // Blush
+  ctx.fillStyle=C.blush;
+  ctx.beginPath();ctx.ellipse(-19,-22,7,4,-.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(19,-22,7,4,.2,0,Math.PI*2);ctx.fill();
+
+  // Beak
+  const bmx=0,bmy=-18;
+  const bkOpen=A.mOpen*8;
+  // Upper beak
+  const bk1=ctx.createLinearGradient(bmx,bmy-3,bmx,bmy+5);
+  bk1.addColorStop(0,C.beak);bk1.addColorStop(1,C.beakD);
+  ctx.fillStyle=bk1;
+  ctx.beginPath();ctx.moveTo(bmx-9,bmy);ctx.quadraticCurveTo(bmx,bmy-8,bmx+9,bmy);ctx.quadraticCurveTo(bmx,bmy+2,bmx-9,bmy);ctx.closePath();ctx.fill();
+  if(bkOpen>0.5){
+    ctx.fillStyle='#361010';
+    ctx.beginPath();ctx.ellipse(bmx,bmy+bkOpen*.5,5,bkOpen*.5,0,0,Math.PI*2);ctx.fill();
+  }
+  // Lower beak
+  ctx.fillStyle=C.beakD;
+  ctx.beginPath();ctx.moveTo(bmx-7,bmy);ctx.quadraticCurveTo(bmx,bmy+3+bkOpen,bmx+7,bmy);ctx.quadraticCurveTo(bmx,bmy+1,bmx-7,bmy);ctx.closePath();ctx.fill();
+
+  // Stars on body when excited
+  if(A.excite>0.3){
+    ctx.fillStyle='rgba(255,217,61,'+A.excite+')';
+    [[24,-18],[30,-5],[-28,-12],[-32,2]].forEach(([sx,sy])=>{
+      ctx.font=`${14*A.excite}px serif`;ctx.textAlign='center';
+      ctx.fillText('✦',sx,sy);
+    });
+  }
+
+  ctx.restore();
+}
+
+function frame(){ctx.clearRect(0,0,W,H);drawBG();drawBuddy(W/2,H*.52);}
+
+function tick(){
+  A.t+=.016;A.stT+=.016;
+  A.breathY=Math.sin(A.t*1.2)*2.5;
+  A.headTilt=Math.sin(A.t*.45)*.028;
+  A.pupX=Math.sin(A.t*.3)*2.5+Math.sin(A.t*.7)*1.2;
+  A.pupY=Math.sin(A.t*.35)*1.8;
+  A.blinkNext--;
+  if(A.blinkNext<=0){A.blinkT=Math.min(1,A.blinkT+.3);if(A.blinkT>=1){A.blinkT=Math.max(0,A.blinkT-.24);if(A.blinkT<=0)A.blinkNext=120+Math.random()*160;}}
+  else A.blinkT=Math.max(0,A.blinkT-.24);
+
+  if(A.state==='idle'){A.browR=lerp(A.browR,0,.05);A.mOpen=lerp(A.mOpen,0,.08);A.mShape=lerp(A.mShape,1,.04);A.waving=lerp(A.waving,0,.05);A.bounce=lerp(A.bounce,0,.06);A.excite=lerp(A.excite,0,.04);}
+  else if(A.state==='thinking'){A.browR=lerp(A.browR,.35,.05);A.mOpen=lerp(A.mOpen,.05,.06);A.mShape=lerp(A.mShape,0,.05);A.waving=lerp(A.waving,0,.05);}
+  else if(A.state==='speaking'){A.browR=lerp(A.browR,.2,.04);A.phonTimer--;if(A.phonTimer<=0){A.phonIdx=(A.phonIdx+1)%PHON.length;A.phonTimer=2+Math.random()*5;}const[to,ts]=PHON[A.phonIdx];A.mOpen=lerp(A.mOpen,to,.3);A.mShape=lerp(A.mShape,ts,.24);}
+  else if(A.state==='listening'){A.browR=lerp(A.browR,.5,.05);A.mOpen=lerp(A.mOpen,.08,.06);}
+  else if(A.state==='excited'){A.waving=lerp(A.waving,1,.1);A.waveT+=.14;A.browR=lerp(A.browR,.9,.08);A.mShape=lerp(A.mShape,1,.08);A.mOpen=lerp(A.mOpen,.3,.1);A.bounce=lerp(A.bounce,1,.08)*Math.abs(Math.sin(A.t*8))*6;A.excite=lerp(A.excite,1,.08);if(A.stT>2.5)setState('idle');}
+  else if(A.state==='greeting'){A.waving=lerp(A.waving,1,.09);A.waveT+=.13;A.browR=lerp(A.browR,.8,.07);A.mOpen=lerp(A.mOpen,.25,.09);A.mShape=lerp(A.mShape,1,.07);if(A.stT>3)setState('idle');}
+  frame();requestAnimationFrame(tick);
+}
+tick();
+
+function setState(s){
+  A.state=s;A.stT=0;
+  const d=document.getElementById('sdot'),l=document.getElementById('slbl'),v=document.getElementById('viz'),uv=document.getElementById('uviz'),mb=document.getElementById('micBtn'),ml=document.getElementById('mlbl'),mi=document.getElementById('micIcon');
+  d.className='sdot'+(s==='speaking'?' sp':s==='thinking'?' th':s==='listening'?' li':'');
+  l.textContent={idle:'Ready!',thinking:'Thinking…',speaking:'Buddy is talking!',listening:'Listening…',excited:'Yay!',greeting:'Hello!'}[s]||'Ready!';
+  v.classList.toggle('on',s==='speaking');
+  uv.classList.toggle('on',s==='listening');
+  mb.className=s==='listening'?'on':s==='speaking'?'speaking':'';
+  mi.textContent=s==='listening'?'🔴':s==='speaking'?'🔊':'🎙️';
+  ml.textContent=s==='listening'?'Listening! Tap to stop':s==='speaking'?'Buddy is talking!':'Tap to speak!';
+  ml.className='mlbl'+(s==='listening'?' on':s==='speaking'?' sp':'');
+}
+
+// ═══════════════════════════════════════════════════
+//  ALPHABET & PHONICS DATA
+// ═══════════════════════════════════════════════════
+const LETTERS=[
+  {l:'A',w:'Apple',e:'🍎',ph:'/æ/',phWord:'as in Apple',ex:'A is for Apple. A, Apple! 🍎'},
+  {l:'B',w:'Ball',e:'⚽',ph:'/b/',phWord:'as in Ball',ex:'B is for Ball. B, Ball! ⚽'},
+  {l:'C',w:'Cat',e:'🐱',ph:'/k/',phWord:'as in Cat',ex:'C is for Cat. C, Cat! 🐱'},
+  {l:'D',w:'Dog',e:'🐶',ph:'/d/',phWord:'as in Dog',ex:'D is for Dog. D, Dog! 🐶'},
+  {l:'E',w:'Elephant',e:'🐘',ph:'/ɛ/',phWord:'as in Elephant',ex:'E is for Elephant. E, Elephant! 🐘'},
+  {l:'F',w:'Fish',e:'🐟',ph:'/f/',phWord:'as in Fish',ex:'F is for Fish. F, Fish! 🐟'},
+  {l:'G',w:'Grapes',e:'🍇',ph:'/ɡ/',phWord:'as in Grapes',ex:'G is for Grapes. G, Grapes! 🍇'},
+  {l:'H',w:'Hat',e:'🎩',ph:'/h/',phWord:'as in Hat',ex:'H is for Hat. H, Hat! 🎩'},
+  {l:'I',w:'Ice cream',e:'🍦',ph:'/ɪ/',phWord:'as in Ice cream',ex:'I is for Ice cream. I, Ice cream! 🍦'},
+  {l:'J',w:'Jellyfish',e:'🪼',ph:'/dʒ/',phWord:'as in Jellyfish',ex:'J is for Jellyfish. J, Jellyfish! 🪼'},
+  {l:'K',w:'Kite',e:'🪁',ph:'/k/',phWord:'as in Kite',ex:'K is for Kite. K, Kite! 🪁'},
+  {l:'L',w:'Lion',e:'🦁',ph:'/l/',phWord:'as in Lion',ex:'L is for Lion. L, Lion! 🦁'},
+  {l:'M',w:'Moon',e:'🌙',ph:'/m/',phWord:'as in Moon',ex:'M is for Moon. M, Moon! 🌙'},
+  {l:'N',w:'Nest',e:'🪺',ph:'/n/',phWord:'as in Nest',ex:'N is for Nest. N, Nest! 🪺'},
+  {l:'O',w:'Orange',e:'🍊',ph:'/ɒ/',phWord:'as in Orange',ex:'O is for Orange. O, Orange! 🍊'},
+  {l:'P',w:'Penguin',e:'🐧',ph:'/p/',phWord:'as in Penguin',ex:'P is for Penguin. P, Penguin! 🐧'},
+  {l:'Q',w:'Queen',e:'👑',ph:'/kw/',phWord:'as in Queen',ex:'Q is for Queen. Q, Queen! 👑'},
+  {l:'R',w:'Rainbow',e:'🌈',ph:'/r/',phWord:'as in Rainbow',ex:'R is for Rainbow. R, Rainbow! 🌈'},
+  {l:'S',w:'Sun',e:'☀️',ph:'/s/',phWord:'as in Sun',ex:'S is for Sun. S, Sun! ☀️'},
+  {l:'T',w:'Tiger',e:'🐯',ph:'/t/',phWord:'as in Tiger',ex:'T is for Tiger. T, Tiger! 🐯'},
+  {l:'U',w:'Umbrella',e:'☂️',ph:'/ʌ/',phWord:'as in Umbrella',ex:'U is for Umbrella. U, Umbrella! ☂️'},
+  {l:'V',w:'Volcano',e:'🌋',ph:'/v/',phWord:'as in Volcano',ex:'V is for Volcano. V, Volcano! 🌋'},
+  {l:'W',w:'Whale',e:'🐋',ph:'/w/',phWord:'as in Whale',ex:'W is for Whale. W, Whale! 🐋'},
+  {l:'X',w:'Xylophone',e:'🎵',ph:'/z/',phWord:'as in Xylophone',ex:'X is for Xylophone. X, Xylophone! 🎵'},
+  {l:'Y',w:'Yacht',e:'⛵',ph:'/j/',phWord:'as in Yacht',ex:'Y is for Yacht. Y, Yacht! ⛵'},
+  {l:'Z',w:'Zebra',e:'🦓',ph:'/z/',phWord:'as in Zebra',ex:'Z is for Zebra. Z, Zebra! 🦓'},
+];
+
+// ═══════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════
+let curIdx=0,mode='learn',stars=0,learned=0,answered=false,mc=0;
+let isListening=false,recog=null;
+
+// Build alphabet bar
+function buildAlphaBar(){
+  const bar=document.getElementById('alphaBar');
+  bar.innerHTML='';
+  LETTERS.forEach((item,i)=>{
+    const b=document.createElement('button');
+    b.className='ab'+(i===0?' active':'');
+    b.textContent=item.l;
+    b.onclick=()=>selectLetter(i);
+    bar.appendChild(b);
+  });
+}
+buildAlphaBar();
+
+function selectLetter(idx){
+  curIdx=idx;
+  document.querySelectorAll('.ab').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const bar=document.getElementById('alphaBar');
+  bar.children[idx]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  if(mode==='learn')showLearnPanel();
+  else if(mode==='quiz')showQuizPanel();
+}
+
+function setMode(m){
+  mode=m;answered=false;
+  ['learn','quiz','chat'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===m));
+  if(m==='learn')showLearnPanel();
+  else if(m==='quiz')showQuizPanel();
+  else showChatPanel();
+}
+
+// ═══════════════════════════════════════════════════
+//  LEARN PANEL
+// ═══════════════════════════════════════════════════
+function showLearnPanel(){
+  const L=LETTERS[curIdx];
+  document.getElementById('topTitle').textContent=`📖 Learning "${L.l}"`;
+  document.getElementById('topSub').textContent=`${L.l} is for ${L.w}!`;
+  answered=false;
+
+  const panel=document.getElementById('lesson-panel');
+  panel.innerHTML=`
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${((curIdx+1)/26*100).toFixed(0)}%"></div></div>
+    <div class="letter-hero">
+      <div class="big-letter">${L.l}</div>
+      <div class="letter-word">${L.l} is for ${L.w}</div>
+      <div class="letter-emoji">${L.e}</div>
+      <div class="letter-phonics">🔊 Sound: ${L.ph} — ${L.phWord}</div>
+      <div class="letter-sentence">"${L.ex}"</div>
+    </div>
+    <div class="buddy-says" id="buddySays">Hi! I'm Buddy! Today we learn the letter ${L.l}! ${L.l} is for ${L.w}! ${L.e}</div>
+    <div class="action-row">
+      <button class="abtn hear" onclick="hearLetter()">🔊 Hear it!</button>
+      <button class="abtn next" onclick="nextLetter()" id="nextBtn">Next Letter ➜</button>
+    </div>
+  `;
+
+  setTimeout(()=>teachLetter(L), 400);
+}
+
+function teachLetter(L){
+  speakText(`${L.l}! ${L.l} is for ${L.w}! ${L.e}. ${L.l}, ${L.w}. Can you say ${L.l}?`,()=>{});
+  setState('speaking');
+}
+
+function hearLetter(){
+  const L=LETTERS[curIdx];
+  speakText(`${L.l}! ${L.l} for ${L.w}! ${L.l}, ${L.l}, ${L.l}!`,()=>{setState('idle');});
+}
+
+// ═══════════════════════════════════════════════════
+//  QUIZ PANEL
+// ═══════════════════════════════════════════════════
+function showQuizPanel(){
+  const L=LETTERS[curIdx];
+  document.getElementById('topTitle').textContent=`🎯 Quiz Time!`;
+  document.getElementById('topSub').textContent=`Which letter makes this sound?`;
+  answered=false;
+
+  // Make 3 wrong choices
+  let opts=[L.l];
+  while(opts.length<4){const r=LETTERS[Math.floor(Math.random()*26)].l;if(!opts.includes(r))opts.push(r);}
+  opts.sort(()=>Math.random()-.5);
+
+  const panel=document.getElementById('lesson-panel');
+  panel.innerHTML=`
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${((curIdx+1)/26*100).toFixed(0)}%"></div></div>
+    <div class="letter-hero" style="padding:14px 14px 12px;">
+      <div class="letter-emoji" style="font-size:72px;margin:0 0 8px;">${L.e}</div>
+      <div class="letter-word" style="font-size:22px;">${L.w}</div>
+      <div class="letter-phonics" style="margin-top:6px;">Sound: ${L.ph}</div>
+    </div>
+    <div class="buddy-says" id="buddySays">Which letter is "${L.l.toLowerCase()}"? Tap the right letter! 🎯</div>
+    <div class="choices-wrap" id="choicesWrap">
+      ${opts.map(o=>`<button class="choice" onclick="checkAnswer('${o}','${L.l}',this)">${o}</button>`).join('')}
+    </div>
+    <button class="abtn next" onclick="nextLetter()" id="nextBtn" disabled style="margin-top:0;">Next ➜</button>
+  `;
+
+  speakText(`Which letter is this? ${L.w} starts with the letter… can you find it?`,()=>{});
+}
+
+function checkAnswer(chosen,correct,btn){
+  if(answered)return;
+  answered=true;
+  const L=LETTERS[curIdx];
+
+  // Highlight the chosen button
+  if(btn) btn.classList.add(chosen===correct?'correct':'wrong');
+
+  // Always highlight the correct answer clearly
+  if(chosen!==correct){
+    document.querySelectorAll('.choice').forEach(b=>{
+      if(b.textContent.trim()===correct) b.classList.add('correct');
+    });
+  }
+
+  // Disable all choices after answering
+  document.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');
+
+  if(chosen===correct){
+    stars+=2;
+    document.getElementById('starCount').textContent=stars;
+    learned++;
+    document.getElementById('lessonCount').textContent=learned;
+    const buddySaysEl=document.getElementById('buddySays');
+    if(buddySaysEl) buddySaysEl.textContent=`Amazing! ${correct} is correct! ${correct} is for ${L.w}! You got 2 stars! Well done!`;
+    setState('excited');
+    confetti();
+    speakText(`Yes! Amazing! ${correct}! ${correct} is for ${L.w}! You are so smart! You earned 2 stars! Well done!`,()=>{setState('idle');});
+  } else {
+    const buddySaysEl=document.getElementById('buddySays');
+    if(buddySaysEl) buddySaysEl.textContent=`Almost! The letter is ${correct}. ${correct} is for ${L.w}. You will get it next time!`;
+    speakText(`Oops! The answer is ${correct}. ${correct} is for ${L.w}. Keep trying, you can do it!`,()=>{setState('idle');});
+  }
+
+  const nextBtn=document.getElementById('nextBtn');
+  if(nextBtn) nextBtn.disabled=false;
+}
+
+// ═══════════════════════════════════════════════════
+//  CHAT PANEL
+// ═══════════════════════════════════════════════════
+function showChatPanel(){
+  document.getElementById('topTitle').textContent='💬 Chat with Buddy';
+  document.getElementById('topSub').textContent='Ask Buddy anything about letters!';
+  document.getElementById('lesson-panel').innerHTML=`<div class="chat-wrap" id="chatWrap"></div>`;
+  addChatMsg(`Hi there! 👋 I'm Buddy your owl tutor! Ask me about any letter, phonics sound, or just say hello! You can also tap the mic to speak! 🎙️`,'b');
+}
+
+function addChatMsg(text,role,html=''){
+  let wrap=document.getElementById('chatWrap');
+  if(!wrap){document.getElementById('lesson-panel').innerHTML='<div class="chat-wrap" id="chatWrap"></div>';wrap=document.getElementById('chatWrap');}
+  const id='m'+(++mc),now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),isB=role==='b';
+  const row=document.createElement('div');row.className='mr'+(isB?'':' u');row.id=id;
+  const av=document.createElement('div');av.className='mav'+(isB?'':' u');av.textContent=isB?'🦉':'👤';
+  const bub=document.createElement('div');bub.className='bub '+(isB?'b':'u');
+  if(html)bub.innerHTML=html;else bub.textContent=text;
+  const mt=document.createElement('div');mt.className='mt';mt.textContent=now;
+  const mw=document.createElement('div');mw.className='mw'+(isB?'':' u');
+  mw.appendChild(bub);mw.appendChild(mt);row.appendChild(av);row.appendChild(mw);
+  wrap.appendChild(row);document.getElementById('lesson-panel').scrollTop=99999;return id;
+}
+function removeMsg(id){document.getElementById(id)?.remove();}
+
+// ═══════════════════════════════════════════════════
+//  VOICE ENGINE
+// ═══════════════════════════════════════════════════
+function getFV(){
+  const vs=speechSynthesis.getVoices();
+  for(const n of['Samantha','Karen','Moira','Victoria','Tessa','Google US English','Microsoft Aria Online','Microsoft Zira']){const v=vs.find(x=>x.name.includes(n));if(v)return v;}
+  return vs.find(v=>/en/i.test(v.lang))||vs[0]||null;
+}
+function speakText(text,onEnd){
+  if(!('speechSynthesis'in window)){setState('idle');onEnd&&onEnd();return;}
+  speechSynthesis.cancel();
+  // Remove emojis and special chars safely, keep words + punctuation
+  const clean=text.replace(/[\uD800-\uDFFF]|[\u2600-\u27FF]|[\u{1F000}-\u{1FFFF}]/gu,' ')
+    .replace(/[^\w\s,.!?'"%-]/g,' ').replace(/\s+/g,' ').trim().slice(0,400);
+  if(!clean){setState('idle');onEnd&&onEnd();return;}
+  const go=()=>{
+    const u=new SpeechSynthesisUtterance(clean);
+    const v=getFV();if(v)u.voice=v;
+    u.rate=.82;u.pitch=1.15;u.volume=1;
+    u.onstart=()=>setState('speaking');
+    u.onend=()=>{setState('idle');onEnd&&onEnd();};
+    u.onerror=()=>{setState('idle');onEnd&&onEnd();};
+    speechSynthesis.speak(u);
+  };
+  // Small delay so speechSynthesis.cancel() has time to clear
+  setTimeout(()=>{
+    speechSynthesis.getVoices().length===0
+      ?speechSynthesis.onvoiceschanged=(()=>{go();speechSynthesis.onvoiceschanged=null;})
+      :go();
+  },80);
+}
+
+// SPEECH-TO-SPEECH
+function toggleListen(){
+  if(isListening){stopListen();}
+  else{startListen();}
+}
+function startListen(){
+  if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){
+    if(mode!=='chat')showChatPanel();
+    addChatMsg('Speech input needs Chrome! Use text below instead.','b');return;
+  }
+  speechSynthesis.cancel();
+  setState('listening');isListening=true;
+  let gotResult=false; // ← flag to prevent onend firing before onresult
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();
+  recog.continuous=false;
+  recog.interimResults=true;
+  recog.lang='en-US';
+  recog.onresult=e=>{
+    let interim='',final='';
+    for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript;}
+    showLiveT(final||interim);
+    if(final){
+      gotResult=true;
+      stopListen();
+      handleVoiceInput(final.trim());
+    }
+  };
+  recog.onerror=e=>{
+    console.warn('Mic error:',e.error);
+    stopListen();
+    if(e.error==='not-allowed') addChatMsg('Microphone blocked! Please allow mic access and try again. 🎙️','b');
+  };
+  recog.onend=()=>{
+    // Only stop if we didn't already handle a result (prevents race condition)
+    if(!gotResult && isListening) stopListen();
+  };
+  recog.start();
+}
+function stopListen(){isListening=false;if(recog){recog.stop();recog=null;}showLiveT('');if(A.state==='listening')setState('idle');}
+function showLiveT(t){const el=document.getElementById('liveT'),tx=document.getElementById('ltText');if(t){el.classList.add('show');tx.textContent=t;}else el.classList.remove('show');}
+
+async function handleVoiceInput(text){
+  const upper=text.trim().toUpperCase();
+  const lower=text.trim().toLowerCase();
+
+  // ── QUIZ MODE: check if the spoken answer matches a letter choice ──
+  if(mode==='quiz' && !answered){
+    // Accept single letter ("A", "bee", "the letter B", "I think it's C")
+    const spokenLetter=extractLetter(text);
+    if(spokenLetter){
+      const L=LETTERS[curIdx];
+      // Simulate clicking the matching choice button
+      const btns=[...document.querySelectorAll('.choice')];
+      const matchBtn=btns.find(b=>b.textContent.trim()===spokenLetter);
+      if(matchBtn){
+        checkAnswer(spokenLetter, L.l, matchBtn);
+        return;
+      }
+    }
+  }
+
+  // ── LEARN MODE: confirm the letter they said and teach it ──
+  if(mode==='learn'){
+    const spokenLetter=extractLetter(text);
+    if(spokenLetter){
+      const idx=LETTERS.findIndex(x=>x.l===spokenLetter);
+      if(idx>=0){
+        selectLetter(idx);
+        const L=LETTERS[idx];
+        setTimeout(()=>speakText(`Yes! ${L.l}! ${L.l} is for ${L.w}! Great job saying ${L.l}!`,()=>{}),400);
+        return;
+      }
+    }
+    // They said the word (e.g. "Apple")
+    const wordMatch=LETTERS.find(x=>lower.includes(x.w.toLowerCase()));
+    if(wordMatch){
+      const idx=LETTERS.indexOf(wordMatch);
+      selectLetter(idx);
+      setTimeout(()=>speakText(`${wordMatch.w}! That starts with the letter ${wordMatch.l}! ${wordMatch.l} for ${wordMatch.w}! Amazing!`,()=>{}),400);
+      return;
+    }
+  }
+
+  // ── CHAT MODE or unrecognised: send to AI ──
+  if(mode!=='chat') setMode('chat');
+  addChatMsg(text,'u');
+  showLiveT('');
+  setState('thinking');
+  const lid=addChatMsg('','b','<div class="dl-wrap"><div class="dl"></div><div class="dl"></div><div class="dl"></div></div>');
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:200,
+        system:`You are Buddy, an enthusiastic friendly owl tutor for kids aged 3-8. You teach A-Z alphabets and phonics.
+- Keep answers SHORT (2-3 sentences max). Very simple words only.
+- Always be warm, encouraging, and fun. Use exclamation marks!
+- If asked about a letter, say: the letter name, a word starting with it, and encourage them
+- End with a fun question or encouragement
+- No complex vocabulary, no markdown, no bullet points — plain speech only`,
+        messages:[{role:'user',content:text}]
+      })
+    });
+    const d=await r.json();
+    removeMsg(lid);
+    const reply=d.content?.[0]?.text||`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
+    addChatMsg(reply,'b');
+    speakText(reply,()=>{});
+  }catch(e){
+    removeMsg(lid);
+    const fb=`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
+    addChatMsg(fb,'b');
+    speakText(fb,()=>{});
+  }
+}
+
+// Helper: extract a single spoken letter from text like "A", "the letter B", "I think C", "bee", "ay"
+function extractLetter(text){
+  const upper=text.trim().toUpperCase();
+  // Direct single letter
+  if(/^[A-Z]$/.test(upper)) return upper;
+  // "The letter X" or "letter X"
+  const m1=upper.match(/\bLETTER\s+([A-Z])\b/);if(m1)return m1[1];
+  // "I think it's X" / "it is X" / "answer is X"
+  const m2=upper.match(/\b(?:IS|IT'S|ITS|THINK|ANSWER|CHOOSE|PICK|SAY)\s+([A-Z])\b/);if(m2)return m2[1];
+  // Phonetic alphabet names → letter (b→B, c→C, etc.)
+  const phonetic={'AY':'A','BEE':'B','CEE':'C','DEE':'D','EE':'E','EF':'F','GEE':'G',
+    'HI':'H','AITCH':'H','EYE':'I','JAY':'J','KAY':'K','EL':'L','EM':'M',
+    'EN':'N','OH':'O','PEE':'P','CUE':'Q','QUE':'Q','AR':'R','ESS':'S',
+    'TEE':'T','YOU':'U','VEE':'V','WE':'W','EX':'X','WHY':'Y','ZEE':'Z','ZED':'Z'};
+  const words=upper.replace(/[^A-Z\s]/g,'').trim().split(/\s+/);
+  // Single word phonetic
+  if(words.length===1&&phonetic[words[0]])return phonetic[words[0]];
+  // Last word in sentence might be the letter
+  const last=words[words.length-1];
+  if(/^[A-Z]$/.test(last))return last;
+  if(phonetic[last])return phonetic[last];
+  return null;
+}
+
+function sendText(){const inp=document.getElementById('ci'),t=inp.value.trim();if(!t)return;inp.value='';handleVoiceInput(t);}
+document.getElementById('ci').addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
+
+function prevLetter(){selectLetter(Math.max(0,curIdx-1));}
+function nextLetter(){selectLetter(Math.min(25,curIdx+1));}
+
+function clearChat(){if(mode==='chat')showChatPanel();else if(mode==='learn')showLearnPanel();else showQuizPanel();}
+
+// CONFETTI
+function confetti(){
+  const colors=['#FFD93D','#FF6B6B','#6BCB77','#6EC6F5','#c77dff'];
+  for(let i=0;i<18;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;left:${Math.random()*100}%;top:-10px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*5)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:fall ${.8+Math.random()*1.2}s linear ${Math.random()*.4}s forwards;z-index:999;pointer-events:none;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),2500);
+  }
+}
+if(!document.getElementById('fallStyle')){const s=document.createElement('style');s.id='fallStyle';s.textContent='@keyframes fall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}';document.head.appendChild(s);}
+
+// INIT
+window.addEventListener('load',()=>{
+  setState('greeting');
+  showLearnPanel();
+  setTimeout(()=>{
+    const g=`Hello! I'm Buddy your owl teacher! 🦉 Let's learn the alphabet together! Today we start with the letter ${LETTERS[0].l}! ${LETTERS[0].l} is for ${LETTERS[0].w}! ${LETTERS[0].e} Tap the mic to speak or tap any letter below!`;
+    speakText(g,()=>{});
+  },700);
+});
+</script>
 </body>
 </html>
