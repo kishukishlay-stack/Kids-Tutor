@@ -13,6 +13,8 @@
   --white:#fff;--light:#e8f0ff;--gold:#FFD93D;
   --border:rgba(255,255,255,0.1);--glass:rgba(255,255,255,0.06);
   --shadow:0 8px 32px rgba(0,0,0,0.4);
+  --bear-body:#c68642;--bear-dark:#8b5e3c;--bear-light:#e8a96a;
+  --bear-snout:#f5cba7;--bear-nose:#3d1c02;--bear-ear:#b5763a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
@@ -33,7 +35,7 @@ body::before{content:'';position:fixed;inset:0;background:
 
 /* BUDDY STAGE */
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:6px;overflow:hidden;position:relative;
-  background:radial-gradient(ellipse 80% 70% at 50% 55%,rgba(110,198,245,.06) 0%,transparent 70%);}
+  background:radial-gradient(ellipse 80% 70% at 50% 55%,rgba(198,134,66,.06) 0%,transparent 70%);}
 #buddyCanvas{display:block;}
 
 .srow{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:5px 14px;font-size:12px;color:var(--sun);font-weight:700;margin:2px 0 4px;font-family:'Nunito',sans-serif;}
@@ -109,7 +111,28 @@ body::before{content:'';position:fixed;inset:0;background:
 .big-letter{font-family:'Fredoka One',cursive;font-size:100px;line-height:1;background:linear-gradient(135deg,var(--sun),var(--coral));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 4px 12px rgba(255,217,61,.3));}
 .letter-word{font-family:'Fredoka One',cursive;font-size:26px;color:var(--white);margin:4px 0;}
 .letter-emoji{font-size:52px;margin:4px 0;}
-.letter-phonics{background:rgba(110,198,245,.15);border:1.5px solid rgba(110,198,245,.25);border-radius:50px;padding:6px 18px;font-size:13px;font-weight:700;color:var(--blue);margin-top:6px;}
+
+/* ENHANCED PHONICS SECTION */
+.phonics-section{width:100%;margin-top:10px;}
+.phonics-title{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:700;}
+.phonics-cards{display:flex;flex-direction:column;gap:7px;width:100%;}
+.phonics-card{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .18s;text-align:left;}
+.phonics-card:hover{background:rgba(255,255,255,.1);border-color:rgba(255,217,61,.3);transform:translateX(3px);}
+.phonics-card.short-sound{border-left:3px solid #6BCB77;}
+.phonics-card.long-sound{border-left:3px solid #6EC6F5;}
+.phonics-card.other-sound{border-left:3px solid #c77dff;}
+.pc-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.pc-body{flex:1;}
+.pc-label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.pc-label.short{color:#6BCB77;}
+.pc-label.long{color:#6EC6F5;}
+.pc-label.other{color:#c77dff;}
+.pc-sound{font-family:'Fredoka One',cursive;font-size:16px;color:var(--white);margin-bottom:3px;}
+.pc-examples{font-size:12px;color:rgba(255,255,255,.65);font-weight:600;line-height:1.5;}
+.pc-examples em{color:var(--sun);font-style:normal;font-weight:800;}
+.hear-sound-btn{background:rgba(255,255,255,.1);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.6);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all .15s;flex-shrink:0;margin-top:2px;}
+.hear-sound-btn:hover{background:rgba(255,217,61,.2);color:var(--sun);}
+
 .letter-sentence{font-size:14px;color:rgba(255,255,255,.7);margin-top:8px;line-height:1.5;font-weight:600;}
 
 /* CHOICES */
@@ -184,7 +207,7 @@ body::before{content:'';position:fixed;inset:0;background:
 <div id="app">
   <div id="left">
     <div class="ptop">
-      <div class="logo">🦉</div>
+      <div class="logo">🐻</div>
       <div><div class="appname">Buddy Learns</div><div class="appsub">AI Tutor</div></div>
     </div>
     <div class="stage">
@@ -232,16 +255,16 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
-<!-- MIC PERMISSION MODAL — shown on first visit or when blocked -->
-<div id="micModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;">
+<!-- MIC PERMISSION MODAL -->
+<div id="micModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
   <div style="background:#0f1e38;border:2px solid rgba(255,217,61,0.3);border-radius:24px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
     <div style="font-size:56px;margin-bottom:12px;">🎙️</div>
     <div style="font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:8px;">Buddy needs your mic!</div>
     <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:24px;">So Buddy can hear you answer questions and talk back! Chrome will ask — just click <strong style="color:#FFD93D">Allow</strong>.</div>
-    <button onclick="requestMicPermission()" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FFD93D,#FF6B6B);color:#0a1228;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;margin-bottom:10px;">
+    <button id="modalAllowBtn" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FFD93D,#FF6B6B);color:#0a1228;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;margin-bottom:10px;">
       ✅ Allow Microphone
     </button>
-    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
+    <button id="modalSkipBtn" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
       Skip — I'll type instead
     </button>
     <div id="micModalStatus" style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.4);min-height:16px;"></div>
@@ -252,24 +275,13 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <script>
 // ═══════════════════════════════════════════════════
-//  BUDDY CANVAS ANIMATION ENGINE
-//  Cute round character: owl-inspired, kid-friendly
+//  TEDDY BEAR CANVAS ANIMATION ENGINE
+//  Cute round teddy bear — kid-friendly & huggable!
 // ═══════════════════════════════════════════════════
 const cv=document.getElementById('buddyCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
 const A={t:0,stT:0,state:'idle',breathY:0,headTilt:0,blinkT:0,blinkNext:150,pupX:0,pupY:0,browR:0,mOpen:0,mShape:0,phonIdx:0,phonTimer:0,waveT:0,waving:0,bounce:0,excite:0};
 const PHON=[[0,0],[.4,1],[.75,2],[.55,1],[.1,0],[.7,2],[.45,1],[.05,0],[.85,2],[.55,1],[.2,0],[.65,2]];
 const lerp=(a,b,t)=>a+(b-a)*t;
-
-const C={
-  body:'#4a90d9',bodyD:'#2c6bb5',bodyL:'#6eb4f7',
-  belly:'#e8f4ff',
-  wing:'#3a7ac9',wingL:'#5a9ae9',
-  eye:'#fff',pupil:'#1a1a2e',
-  beak:'#FFD93D',beakD:'#e6b800',
-  blush:'rgba(255,150,120,0.3)',
-  feet:'#FFD93D',
-  star:'#FFD93D',
-};
 
 function drawBG(){
   const g=ctx.createRadialGradient(W/2,H*.7,10,W/2,H*.4,W);
@@ -280,128 +292,217 @@ function drawBG(){
   [[30,20],[80,35],[260,18],[300,40],[180,15],[50,60]].forEach(([x,y])=>{
     ctx.beginPath();ctx.arc(x,y,1+Math.sin(A.t+x)*.5,0,Math.PI*2);ctx.fill();
   });
+  // Warm ground glow
+  const gg=ctx.createRadialGradient(W/2,H,5,W/2,H*.7,W*.6);
+  gg.addColorStop(0,'rgba(198,134,66,0.08)');gg.addColorStop(1,'transparent');
+  ctx.fillStyle=gg;ctx.fillRect(0,0,W,H);
 }
 
-function drawBuddy(cx2,cy2){
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function drawTeddy(cx2,cy2){
   const by=cy2+A.breathY+A.bounce;
+
   // Shadow
-  ctx.fillStyle='rgba(0,0,0,0.2)';
-  ctx.beginPath();ctx.ellipse(cx2,by+66,38,8,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.25)';
+  ctx.beginPath();ctx.ellipse(cx2,by+72,42,9,0,0,Math.PI*2);ctx.fill();
 
-  // Feet
-  ctx.fillStyle=C.feet;
-  ctx.beginPath();ctx.ellipse(cx2-14,by+64,10,5,-.2,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(cx2+14,by+64,10,5,.2,0,Math.PI*2);ctx.fill();
+  // === FEET / LEGS ===
+  // Left foot
+  const fg=ctx.createRadialGradient(cx2-18,by+65,2,cx2-18,by+62,18);
+  fg.addColorStop(0,'#e8a96a');fg.addColorStop(1,'#c68642');
+  ctx.fillStyle=fg;
+  ctx.beginPath();ctx.ellipse(cx2-18,by+66,16,10,-.15,0,Math.PI*2);ctx.fill();
+  // Paw pads on left foot
+  ctx.fillStyle='rgba(139,94,60,0.5)';
+  ctx.beginPath();ctx.ellipse(cx2-18,by+70,7,4,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(139,94,60,0.4)';
+  [[cx2-24,by+68],[cx2-12,by+68],[cx2-18,by+65]].forEach(([px,py])=>{
+    ctx.beginPath();ctx.ellipse(px,py,2.5,2,0,0,Math.PI*2);ctx.fill();
+  });
 
+  // Right foot
+  ctx.fillStyle=fg;
+  ctx.beginPath();ctx.ellipse(cx2+18,by+66,16,10,.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(139,94,60,0.5)';
+  ctx.beginPath();ctx.ellipse(cx2+18,by+70,7,4,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(139,94,60,0.4)';
+  [[cx2+12,by+68],[cx2+24,by+68],[cx2+18,by+65]].forEach(([px,py])=>{
+    ctx.beginPath();ctx.ellipse(px,py,2.5,2,0,0,Math.PI*2);ctx.fill();
+  });
+
+  // === BODY ===
+  const bg=ctx.createRadialGradient(cx2-8,by+10,5,cx2,by+15,48);
+  bg.addColorStop(0,'#e8a96a');bg.addColorStop(1,'#c68642');
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.ellipse(cx2,by+15,38,46,0,0,Math.PI*2);ctx.fill();
+
+  // Body outline (subtle)
+  ctx.strokeStyle='rgba(139,94,60,0.3)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.ellipse(cx2,by+15,38,46,0,0,Math.PI*2);ctx.stroke();
+
+  // Belly patch
+  const belly=ctx.createRadialGradient(cx2,by+20,3,cx2,by+20,26);
+  belly.addColorStop(0,'#f5deb3');belly.addColorStop(1,'#e8c88a');
+  ctx.fillStyle=belly;
+  ctx.beginPath();ctx.ellipse(cx2,by+20,22,26,0,0,Math.PI*2);ctx.fill();
+
+  // === WAVING ARM (left — waves when excited) ===
+  const wl=A.waving;
+  const wAngle=-Math.PI/3+Math.sin(A.waveT*2.5)*Math.PI/4*wl;
+  ctx.save();
+  ctx.translate(cx2-34,by+5);
+  ctx.rotate(wAngle);
+  const ag=ctx.createRadialGradient(0,0,2,0,8,18);
+  ag.addColorStop(0,'#e8a96a');ag.addColorStop(1,'#c68642');
+  ctx.fillStyle=ag;
+  ctx.beginPath();ctx.ellipse(0,14,11,20,0,0,Math.PI*2);ctx.fill();
+  // Paw on arm
+  ctx.fillStyle='#e8a96a';
+  ctx.beginPath();ctx.ellipse(0,32,10,10,0,0,Math.PI*2);ctx.fill();
+  // Paw pads
+  ctx.fillStyle='rgba(139,94,60,0.4)';
+  ctx.beginPath();ctx.ellipse(0,35,5,4,0,0,Math.PI*2);ctx.fill();
+  [[-5,31],[5,31],[0,28]].forEach(([px,py])=>{
+    ctx.beginPath();ctx.ellipse(px,py,2,1.8,0,0,Math.PI*2);ctx.fill();
+  });
+  ctx.restore();
+
+  // Right arm (static, slight pose)
+  ctx.save();
+  ctx.translate(cx2+34,by+5);
+  ctx.rotate(Math.PI/6+Math.sin(A.t*.4)*.04);
+  ctx.fillStyle=bg;
+  ctx.beginPath();ctx.ellipse(0,14,11,20,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8a96a';
+  ctx.beginPath();ctx.ellipse(0,32,10,10,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(139,94,60,0.4)';
+  ctx.beginPath();ctx.ellipse(0,35,5,4,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+
+  // === HEAD ===
   ctx.save();
   ctx.translate(cx2,by);
   ctx.rotate(A.headTilt);
 
-  // Wings (animated wave when waving)
-  const wl=A.waving;
-  // Left wing
-  ctx.fillStyle=C.wing;
-  ctx.beginPath();
-  ctx.moveTo(-22,5);
-  ctx.quadraticCurveTo(-52+wl*10,-10+Math.sin(A.waveT*2)*15*wl,-48+wl*8,-30+Math.sin(A.waveT)*20*wl);
-  ctx.quadraticCurveTo(-35+wl*5,-20,-22,2);
-  ctx.closePath();ctx.fill();
-  ctx.fillStyle=C.wingL;
-  ctx.beginPath();
-  ctx.moveTo(-22,5);
-  ctx.quadraticCurveTo(-46+wl*8,-8+Math.sin(A.waveT*2)*12*wl,-42+wl*6,-24+Math.sin(A.waveT)*16*wl);
-  ctx.quadraticCurveTo(-32+wl*4,-16,-22,2);
-  ctx.closePath();ctx.fill();
+  // Ears (behind head)
+  const earG=ctx.createRadialGradient(-26,-48,2,-26,-48,14);
+  earG.addColorStop(0,'#e8a96a');earG.addColorStop(1,'#b5763a');
+  ctx.fillStyle=earG;
+  // Left ear
+  ctx.beginPath();ctx.ellipse(-24,-50,14,14,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8956a';
+  ctx.beginPath();ctx.ellipse(-24,-50,8,8,0,0,Math.PI*2);ctx.fill();
+  // Right ear
+  ctx.fillStyle=earG;
+  ctx.beginPath();ctx.ellipse(24,-50,14,14,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8956a';
+  ctx.beginPath();ctx.ellipse(24,-50,8,8,0,0,Math.PI*2);ctx.fill();
 
-  // Right wing
-  ctx.fillStyle=C.wing;
-  ctx.beginPath();
-  ctx.moveTo(22,5);
-  ctx.quadraticCurveTo(52,2,50,-26);
-  ctx.quadraticCurveTo(38,-16,22,2);
-  ctx.closePath();ctx.fill();
-
-  // Body
-  const bg=ctx.createRadialGradient(-8,-10,5,0,0,42);
-  bg.addColorStop(0,C.bodyL);bg.addColorStop(1,C.body);
-  ctx.fillStyle=bg;
-  ctx.beginPath();ctx.ellipse(0,10,36,44,0,0,Math.PI*2);ctx.fill();
-
-  // Belly
-  const belly=ctx.createRadialGradient(0,15,5,0,15,26);
-  belly.addColorStop(0,'#ffffff');belly.addColorStop(1,C.belly);
-  ctx.fillStyle=belly;
-  ctx.beginPath();ctx.ellipse(0,18,20,26,0,0,Math.PI*2);ctx.fill();
-
-  // Head
-  const hg=ctx.createRadialGradient(-5,-30,4,0,-28,30);
-  hg.addColorStop(0,C.bodyL);hg.addColorStop(1,C.body);
+  // Head main
+  const hg=ctx.createRadialGradient(-6,-28,4,0,-26,32);
+  hg.addColorStop(0,'#e8a96a');hg.addColorStop(1,'#c68642');
   ctx.fillStyle=hg;
-  ctx.beginPath();ctx.ellipse(0,-28,28,28,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,-26,30,30,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(139,94,60,0.2)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.ellipse(0,-26,30,30,0,0,Math.PI*2);ctx.stroke();
 
-  // Ear tufts
-  ctx.fillStyle=C.bodyD;
-  ctx.beginPath();ctx.moveTo(-16,-50);ctx.lineTo(-22,-62+A.excite*5);ctx.lineTo(-8,-52);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(16,-50);ctx.lineTo(22,-62+A.excite*5);ctx.lineTo(8,-52);ctx.closePath();ctx.fill();
-  ctx.fillStyle=C.bodyL;
-  ctx.beginPath();ctx.moveTo(-14,-51);ctx.lineTo(-18,-59+A.excite*4);ctx.lineTo(-8,-52);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(14,-51);ctx.lineTo(18,-59+A.excite*4);ctx.lineTo(8,-52);ctx.closePath();ctx.fill();
+  // Forehead tuft (little fur tufts)
+  ctx.fillStyle='rgba(232,169,106,0.7)';
+  [[-6,-54],[0,-56],[6,-54]].forEach(([tx,ty])=>{
+    ctx.beginPath();ctx.ellipse(tx,ty,3,5,tx*.03,0,Math.PI*2);ctx.fill();
+  });
 
-  // Eye rings (feather rings)
-  ctx.fillStyle=C.bodyD;
-  ctx.beginPath();ctx.ellipse(-11,-28,13,13,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(11,-28,13,13,0,0,Math.PI*2);ctx.fill();
-
-  // Eyes
+  // === EYES ===
   const eyeOp=1-A.blinkT;
-  ctx.fillStyle=C.eye;
-  ctx.beginPath();ctx.ellipse(-11,-28,10,10*eyeOp,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(11,-28,10,10*eyeOp,0,0,Math.PI*2);ctx.fill();
+  const px=A.pupX*.12,py=A.pupY*.12;
+
+  // Eye bg (white sclera)
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.ellipse(-11,-28,9,9*eyeOp,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(11,-28,9,9*eyeOp,0,0,Math.PI*2);ctx.fill();
 
   if(eyeOp>.1){
-    const px=A.pupX*.15,py=A.pupY*.15;
-    ctx.fillStyle='#1a1a2e';
-    ctx.beginPath();ctx.ellipse(-11+px,-28+py,6,6*eyeOp,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(11+px,-28+py,6,6*eyeOp,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='white';
+    // Dark pupils
+    ctx.fillStyle='#1a0a00';
+    ctx.beginPath();ctx.ellipse(-11+px,-28+py,5.5,5.5*eyeOp,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(11+px,-28+py,5.5,5.5*eyeOp,0,0,Math.PI*2);ctx.fill();
+    // Shine
+    ctx.fillStyle='rgba(255,255,255,0.9)';
     ctx.beginPath();ctx.ellipse(-9+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.ellipse(13+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
+    // Tiny extra shine
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.beginPath();ctx.ellipse(-12+px,-26+py,1,1*eyeOp,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(12+px,-26+py,1,1*eyeOp,0,0,Math.PI*2);ctx.fill();
   }
+
   // Blink lid
   if(A.blinkT>.05){
-    ctx.fillStyle=C.body;
-    ctx.beginPath();ctx.ellipse(-11,-28-10*(1-A.blinkT),11,11,0,Math.PI,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(11,-28-10*(1-A.blinkT),11,11,0,Math.PI,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c68642';
+    ctx.beginPath();ctx.ellipse(-11,-28-9*(1-A.blinkT),10,10,0,Math.PI,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(11,-28-9*(1-A.blinkT),10,10,0,Math.PI,Math.PI*2);ctx.fill();
   }
 
-  // Eyebrows
-  ctx.strokeStyle='rgba(255,255,255,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
-  const bl=A.browR*5;
-  ctx.beginPath();ctx.moveTo(-19,-40-bl);ctx.quadraticCurveTo(-11,-43-bl,-4,-40-bl*.7);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(4,-40-bl*.7);ctx.quadraticCurveTo(11,-43-bl,19,-40-bl);ctx.stroke();
+  // Eyebrows (expressive)
+  ctx.strokeStyle='#6b3a1f';ctx.lineWidth=2.5;ctx.lineCap='round';
+  const bl=A.browR*6;
+  ctx.beginPath();ctx.moveTo(-18,-39-bl);ctx.quadraticCurveTo(-11,-42-bl,-4,-39-bl*.6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(4,-39-bl*.6);ctx.quadraticCurveTo(11,-42-bl,18,-39-bl);ctx.stroke();
 
-  // Blush
-  ctx.fillStyle=C.blush;
-  ctx.beginPath();ctx.ellipse(-19,-22,7,4,-.2,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(19,-22,7,4,.2,0,Math.PI*2);ctx.fill();
+  // Blush cheeks
+  ctx.fillStyle='rgba(255,140,100,0.25)';
+  ctx.beginPath();ctx.ellipse(-18,-20,9,5,-.15,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(18,-20,9,5,.15,0,Math.PI*2);ctx.fill();
 
-  // Beak
-  const bmx=0,bmy=-18;
-  const bkOpen=A.mOpen*8;
-  // Upper beak
-  const bk1=ctx.createLinearGradient(bmx,bmy-3,bmx,bmy+5);
-  bk1.addColorStop(0,C.beak);bk1.addColorStop(1,C.beakD);
-  ctx.fillStyle=bk1;
-  ctx.beginPath();ctx.moveTo(bmx-9,bmy);ctx.quadraticCurveTo(bmx,bmy-8,bmx+9,bmy);ctx.quadraticCurveTo(bmx,bmy+2,bmx-9,bmy);ctx.closePath();ctx.fill();
-  if(bkOpen>0.5){
-    ctx.fillStyle='#361010';
-    ctx.beginPath();ctx.ellipse(bmx,bmy+bkOpen*.5,5,bkOpen*.5,0,0,Math.PI*2);ctx.fill();
+  // === SNOUT ===
+  const snoutG=ctx.createRadialGradient(0,-13,2,0,-14,14);
+  snoutG.addColorStop(0,'#f5e6c8');snoutG.addColorStop(1,'#e8cfa0');
+  ctx.fillStyle=snoutG;
+  ctx.beginPath();ctx.ellipse(0,-13,14,10,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(139,94,60,0.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.ellipse(0,-13,14,10,0,0,Math.PI*2);ctx.stroke();
+
+  // Nose
+  const noseG=ctx.createRadialGradient(-1,-19,1,0,-19,5);
+  noseG.addColorStop(0,'#5a1a0a');noseG.addColorStop(1,'#2d0c02');
+  ctx.fillStyle=noseG;
+  ctx.beginPath();ctx.ellipse(0,-19,5.5,3.5,0,0,Math.PI*2);ctx.fill();
+  // Nose shine
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.beginPath();ctx.ellipse(-1.5,-20,1.5,1,0,0,Math.PI*2);ctx.fill();
+
+  // Mouth
+  const bkOpen=A.mOpen*7;
+  const mShape=A.mShape;
+  ctx.strokeStyle='#5a2a0a';ctx.lineWidth=2;ctx.lineCap='round';
+  // Smile / frown shape
+  ctx.beginPath();
+  ctx.moveTo(-6,-10);
+  ctx.quadraticCurveTo(0,-7+mShape*4+bkOpen,6,-10);
+  ctx.stroke();
+  // Vertical center line
+  ctx.beginPath();ctx.moveTo(0,-13);ctx.lineTo(0,-10);ctx.stroke();
+
+  if(bkOpen>1){
+    // Mouth open interior
+    ctx.fillStyle='#361005';
+    ctx.beginPath();ctx.ellipse(0,-8+bkOpen*.3,5,bkOpen*.6,0,0,Math.PI*2);ctx.fill();
+    // Little tongue
+    if(bkOpen>3){
+      ctx.fillStyle='#e07070';
+      ctx.beginPath();ctx.ellipse(0,-7+bkOpen*.4,3,bkOpen*.35,0,0,Math.PI*2);ctx.fill();
+    }
   }
-  // Lower beak
-  ctx.fillStyle=C.beakD;
-  ctx.beginPath();ctx.moveTo(bmx-7,bmy);ctx.quadraticCurveTo(bmx,bmy+3+bkOpen,bmx+7,bmy);ctx.quadraticCurveTo(bmx,bmy+1,bmx-7,bmy);ctx.closePath();ctx.fill();
 
-  // Stars on body when excited
+  // Excited stars / sparkles
   if(A.excite>0.3){
     ctx.fillStyle='rgba(255,217,61,'+A.excite+')';
     [[24,-18],[30,-5],[-28,-12],[-32,2]].forEach(([sx,sy])=>{
@@ -410,15 +511,26 @@ function drawBuddy(cx2,cy2){
     });
   }
 
+  // Little bow tie on body (cute detail)
+  if(A.state!=='listening'){
+    ctx.save();
+    ctx.translate(0,3);
+    ctx.fillStyle='#FF6B6B';
+    ctx.beginPath();ctx.moveTo(-10,0);ctx.quadraticCurveTo(-5,-5,0,0);ctx.quadraticCurveTo(-5,5,-10,0);ctx.fill();
+    ctx.beginPath();ctx.moveTo(10,0);ctx.quadraticCurveTo(5,-5,0,0);ctx.quadraticCurveTo(5,5,10,0);ctx.fill();
+    ctx.fillStyle='#b91c1c';ctx.beginPath();ctx.ellipse(0,0,3,3,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
+
   ctx.restore();
 }
 
-function frame(){ctx.clearRect(0,0,W,H);drawBG();drawBuddy(W/2,H*.52);}
+function frame(){ctx.clearRect(0,0,W,H);drawBG();drawTeddy(W/2,H*.50);}
 
 function tick(){
   A.t+=.016;A.stT+=.016;
   A.breathY=Math.sin(A.t*1.2)*2.5;
-  A.headTilt=Math.sin(A.t*.45)*.028;
+  A.headTilt=Math.sin(A.t*.45)*.03;
   A.pupX=Math.sin(A.t*.3)*2.5+Math.sin(A.t*.7)*1.2;
   A.pupY=Math.sin(A.t*.35)*1.8;
   A.blinkNext--;
@@ -449,35 +561,128 @@ function setState(s){
 }
 
 // ═══════════════════════════════════════════════════
-//  ALPHABET & PHONICS DATA
+//  RICH PHONICS DATA — Multiple sounds per letter
 // ═══════════════════════════════════════════════════
 const LETTERS=[
-  {l:'A',w:'Apple',e:'🍎',ph:'/æ/',phWord:'as in Apple',ex:'A is for Apple. A, Apple! 🍎'},
-  {l:'B',w:'Ball',e:'⚽',ph:'/b/',phWord:'as in Ball',ex:'B is for Ball. B, Ball! ⚽'},
-  {l:'C',w:'Cat',e:'🐱',ph:'/k/',phWord:'as in Cat',ex:'C is for Cat. C, Cat! 🐱'},
-  {l:'D',w:'Dog',e:'🐶',ph:'/d/',phWord:'as in Dog',ex:'D is for Dog. D, Dog! 🐶'},
-  {l:'E',w:'Elephant',e:'🐘',ph:'/ɛ/',phWord:'as in Elephant',ex:'E is for Elephant. E, Elephant! 🐘'},
-  {l:'F',w:'Fish',e:'🐟',ph:'/f/',phWord:'as in Fish',ex:'F is for Fish. F, Fish! 🐟'},
-  {l:'G',w:'Grapes',e:'🍇',ph:'/ɡ/',phWord:'as in Grapes',ex:'G is for Grapes. G, Grapes! 🍇'},
-  {l:'H',w:'Hat',e:'🎩',ph:'/h/',phWord:'as in Hat',ex:'H is for Hat. H, Hat! 🎩'},
-  {l:'I',w:'Ice cream',e:'🍦',ph:'/ɪ/',phWord:'as in Ice cream',ex:'I is for Ice cream. I, Ice cream! 🍦'},
-  {l:'J',w:'Jellyfish',e:'🪼',ph:'/dʒ/',phWord:'as in Jellyfish',ex:'J is for Jellyfish. J, Jellyfish! 🪼'},
-  {l:'K',w:'Kite',e:'🪁',ph:'/k/',phWord:'as in Kite',ex:'K is for Kite. K, Kite! 🪁'},
-  {l:'L',w:'Lion',e:'🦁',ph:'/l/',phWord:'as in Lion',ex:'L is for Lion. L, Lion! 🦁'},
-  {l:'M',w:'Moon',e:'🌙',ph:'/m/',phWord:'as in Moon',ex:'M is for Moon. M, Moon! 🌙'},
-  {l:'N',w:'Nest',e:'🪺',ph:'/n/',phWord:'as in Nest',ex:'N is for Nest. N, Nest! 🪺'},
-  {l:'O',w:'Orange',e:'🍊',ph:'/ɒ/',phWord:'as in Orange',ex:'O is for Orange. O, Orange! 🍊'},
-  {l:'P',w:'Penguin',e:'🐧',ph:'/p/',phWord:'as in Penguin',ex:'P is for Penguin. P, Penguin! 🐧'},
-  {l:'Q',w:'Queen',e:'👑',ph:'/kw/',phWord:'as in Queen',ex:'Q is for Queen. Q, Queen! 👑'},
-  {l:'R',w:'Rainbow',e:'🌈',ph:'/r/',phWord:'as in Rainbow',ex:'R is for Rainbow. R, Rainbow! 🌈'},
-  {l:'S',w:'Sun',e:'☀️',ph:'/s/',phWord:'as in Sun',ex:'S is for Sun. S, Sun! ☀️'},
-  {l:'T',w:'Tiger',e:'🐯',ph:'/t/',phWord:'as in Tiger',ex:'T is for Tiger. T, Tiger! 🐯'},
-  {l:'U',w:'Umbrella',e:'☂️',ph:'/ʌ/',phWord:'as in Umbrella',ex:'U is for Umbrella. U, Umbrella! ☂️'},
-  {l:'V',w:'Volcano',e:'🌋',ph:'/v/',phWord:'as in Volcano',ex:'V is for Volcano. V, Volcano! 🌋'},
-  {l:'W',w:'Whale',e:'🐋',ph:'/w/',phWord:'as in Whale',ex:'W is for Whale. W, Whale! 🐋'},
-  {l:'X',w:'Xylophone',e:'🎵',ph:'/z/',phWord:'as in Xylophone',ex:'X is for Xylophone. X, Xylophone! 🎵'},
-  {l:'Y',w:'Yacht',e:'⛵',ph:'/j/',phWord:'as in Yacht',ex:'Y is for Yacht. Y, Yacht! ⛵'},
-  {l:'Z',w:'Zebra',e:'🦓',ph:'/z/',phWord:'as in Zebra',ex:'Z is for Zebra. Z, Zebra! 🦓'},
+  {l:'A',w:'Apple',e:'🍎',
+   sounds:[
+    {type:'short',icon:'🍎',label:'Short A',symbol:'/ă/',desc:'as in <em>apple</em>, <em>cat</em>, <em>hat</em>',speak:'short A, as in apple, cat, hat'},
+    {type:'long', icon:'🎂',label:'Long A', symbol:'/ā/',desc:'as in <em>cake</em>, <em>rain</em>, <em>name</em>',speak:'long A, as in cake, rain, name'},
+    {type:'other',icon:'🧡',label:'Other A', symbol:'/ah/',desc:'as in <em>father</em>, <em>car</em>, <em>star</em>',speak:'ah sound, as in father, car, star'},
+   ],ex:'A is for Apple. A, Apple!'},
+  {l:'B',w:'Ball',e:'⚽',
+   sounds:[
+    {type:'short',icon:'⚽',label:'B Sound',symbol:'/b/',desc:'as in <em>ball</em>, <em>bat</em>, <em>bed</em>',speak:'B sound, as in ball, bat, bed'},
+   ],ex:'B is for Ball. B, Ball!'},
+  {l:'C',w:'Cat',e:'🐱',
+   sounds:[
+    {type:'short',icon:'🐱',label:'Hard C',symbol:'/k/',desc:'as in <em>cat</em>, <em>cup</em>, <em>coat</em>',speak:'hard C, as in cat, cup, coat'},
+    {type:'long', icon:'🧊',label:'Soft C',symbol:'/s/',desc:'as in <em>city</em>, <em>cent</em>, <em>ice</em>',speak:'soft C, as in city, cent, ice'},
+   ],ex:'C is for Cat. C, Cat!'},
+  {l:'D',w:'Dog',e:'🐶',
+   sounds:[
+    {type:'short',icon:'🐶',label:'D Sound',symbol:'/d/',desc:'as in <em>dog</em>, <em>dig</em>, <em>door</em>',speak:'D sound, as in dog, dig, door'},
+   ],ex:'D is for Dog. D, Dog!'},
+  {l:'E',w:'Elephant',e:'🐘',
+   sounds:[
+    {type:'short',icon:'🐘',label:'Short E',symbol:'/ĕ/',desc:'as in <em>elephant</em>, <em>bed</em>, <em>red</em>',speak:'short E, as in elephant, bed, red'},
+    {type:'long', icon:'🦅',label:'Long E', symbol:'/ē/',desc:'as in <em>eagle</em>, <em>sweet</em>, <em>tree</em>',speak:'long E, as in eagle, sweet, tree'},
+   ],ex:'E is for Elephant. E, Elephant!'},
+  {l:'F',w:'Fish',e:'🐟',
+   sounds:[
+    {type:'short',icon:'🐟',label:'F Sound',symbol:'/f/',desc:'as in <em>fish</em>, <em>fun</em>, <em>frog</em>',speak:'F sound, as in fish, fun, frog'},
+   ],ex:'F is for Fish. F, Fish!'},
+  {l:'G',w:'Grapes',e:'🍇',
+   sounds:[
+    {type:'short',icon:'🍇',label:'Hard G',symbol:'/ɡ/',desc:'as in <em>grapes</em>, <em>go</em>, <em>good</em>',speak:'hard G, as in grapes, go, good'},
+    {type:'long', icon:'🧊',label:'Soft G',symbol:'/dʒ/',desc:'as in <em>giraffe</em>, <em>gem</em>, <em>gym</em>',speak:'soft G, as in giraffe, gem, gym'},
+   ],ex:'G is for Grapes. G, Grapes!'},
+  {l:'H',w:'Hat',e:'🎩',
+   sounds:[
+    {type:'short',icon:'🎩',label:'H Sound',symbol:'/h/',desc:'as in <em>hat</em>, <em>hop</em>, <em>hill</em>',speak:'H sound, as in hat, hop, hill'},
+   ],ex:'H is for Hat. H, Hat!'},
+  {l:'I',w:'Ice cream',e:'🍦',
+   sounds:[
+    {type:'short',icon:'🍦',label:'Short I',symbol:'/ĭ/',desc:'as in <em>igloo</em>, <em>sit</em>, <em>big</em>',speak:'short I, as in igloo, sit, big'},
+    {type:'long', icon:'🧊',label:'Long I', symbol:'/ī/',desc:'as in <em>ice</em>, <em>kite</em>, <em>time</em>',speak:'long I, as in ice, kite, time'},
+   ],ex:'I is for Ice cream. I, Ice cream!'},
+  {l:'J',w:'Jellyfish',e:'🪼',
+   sounds:[
+    {type:'short',icon:'🪼',label:'J Sound',symbol:'/dʒ/',desc:'as in <em>jellyfish</em>, <em>jump</em>, <em>jar</em>',speak:'J sound, as in jellyfish, jump, jar'},
+   ],ex:'J is for Jellyfish. J, Jellyfish!'},
+  {l:'K',w:'Kite',e:'🪁',
+   sounds:[
+    {type:'short',icon:'🪁',label:'K Sound',symbol:'/k/',desc:'as in <em>kite</em>, <em>king</em>, <em>kick</em>',speak:'K sound, as in kite, king, kick'},
+   ],ex:'K is for Kite. K, Kite!'},
+  {l:'L',w:'Lion',e:'🦁',
+   sounds:[
+    {type:'short',icon:'🦁',label:'L Sound',symbol:'/l/',desc:'as in <em>lion</em>, <em>lamp</em>, <em>leaf</em>',speak:'L sound, as in lion, lamp, leaf'},
+   ],ex:'L is for Lion. L, Lion!'},
+  {l:'M',w:'Moon',e:'🌙',
+   sounds:[
+    {type:'short',icon:'🌙',label:'M Sound',symbol:'/m/',desc:'as in <em>moon</em>, <em>map</em>, <em>milk</em>',speak:'M sound, as in moon, map, milk'},
+   ],ex:'M is for Moon. M, Moon!'},
+  {l:'N',w:'Nest',e:'🪺',
+   sounds:[
+    {type:'short',icon:'🪺',label:'N Sound',symbol:'/n/',desc:'as in <em>nest</em>, <em>nap</em>, <em>net</em>',speak:'N sound, as in nest, nap, net'},
+   ],ex:'N is for Nest. N, Nest!'},
+  {l:'O',w:'Orange',e:'🍊',
+   sounds:[
+    {type:'short',icon:'🍊',label:'Short O',symbol:'/ŏ/',desc:'as in <em>orange</em>, <em>hot</em>, <em>pot</em>',speak:'short O, as in orange, hot, pot'},
+    {type:'long', icon:'🌊',label:'Long O', symbol:'/ō/',desc:'as in <em>open</em>, <em>boat</em>, <em>note</em>',speak:'long O, as in open, boat, note'},
+    {type:'other',icon:'🦮',label:'Oo Sound',symbol:'/oo/',desc:'as in <em>moon</em>, <em>food</em>, <em>cool</em>',speak:'oo sound, as in moon, food, cool'},
+   ],ex:'O is for Orange. O, Orange!'},
+  {l:'P',w:'Penguin',e:'🐧',
+   sounds:[
+    {type:'short',icon:'🐧',label:'P Sound',symbol:'/p/',desc:'as in <em>penguin</em>, <em>pop</em>, <em>pin</em>',speak:'P sound, as in penguin, pop, pin'},
+   ],ex:'P is for Penguin. P, Penguin!'},
+  {l:'Q',w:'Queen',e:'👑',
+   sounds:[
+    {type:'short',icon:'👑',label:'QU Sound',symbol:'/kw/',desc:'as in <em>queen</em>, <em>quack</em>, <em>quiz</em>',speak:'Q W sound, as in queen, quack, quiz'},
+   ],ex:'Q is for Queen. Q, Queen!'},
+  {l:'R',w:'Rainbow',e:'🌈',
+   sounds:[
+    {type:'short',icon:'🌈',label:'R Sound',symbol:'/r/',desc:'as in <em>rainbow</em>, <em>run</em>, <em>red</em>',speak:'R sound, as in rainbow, run, red'},
+   ],ex:'R is for Rainbow. R, Rainbow!'},
+  {l:'S',w:'Sun',e:'☀️',
+   sounds:[
+    {type:'short',icon:'☀️',label:'S Sound',symbol:'/s/',desc:'as in <em>sun</em>, <em>sit</em>, <em>soup</em>',speak:'S sound, as in sun, sit, soup'},
+    {type:'long', icon:'🎵',label:'Z Sound',symbol:'/z/',desc:'S says Z in <em>dogs</em>, <em>nose</em>, <em>easy</em>',speak:'S says Z in dogs, nose, easy'},
+    {type:'other',icon:'🎸',label:'SH Sound',symbol:'/ʃ/',desc:'as in <em>shoe</em>, <em>ship</em>, <em>fish</em>',speak:'SH sound, as in shoe, ship, fish'},
+   ],ex:'S is for Sun. S, Sun!'},
+  {l:'T',w:'Tiger',e:'🐯',
+   sounds:[
+    {type:'short',icon:'🐯',label:'T Sound',symbol:'/t/',desc:'as in <em>tiger</em>, <em>top</em>, <em>ten</em>',speak:'T sound, as in tiger, top, ten'},
+    {type:'long', icon:'🌊',label:'TH Sound',symbol:'/θ/',desc:'as in <em>the</em>, <em>this</em>, <em>three</em>',speak:'TH sound, as in the, this, three'},
+   ],ex:'T is for Tiger. T, Tiger!'},
+  {l:'U',w:'Umbrella',e:'☂️',
+   sounds:[
+    {type:'short',icon:'☂️',label:'Short U',symbol:'/ŭ/',desc:'as in <em>umbrella</em>, <em>cup</em>, <em>bug</em>',speak:'short U, as in umbrella, cup, bug'},
+    {type:'long', icon:'🦄',label:'Long U', symbol:'/ū/',desc:'as in <em>uniform</em>, <em>cube</em>, <em>cute</em>',speak:'long U, as in uniform, cube, cute'},
+   ],ex:'U is for Umbrella. U, Umbrella!'},
+  {l:'V',w:'Volcano',e:'🌋',
+   sounds:[
+    {type:'short',icon:'🌋',label:'V Sound',symbol:'/v/',desc:'as in <em>volcano</em>, <em>van</em>, <em>vine</em>',speak:'V sound, as in volcano, van, vine'},
+   ],ex:'V is for Volcano. V, Volcano!'},
+  {l:'W',w:'Whale',e:'🐋',
+   sounds:[
+    {type:'short',icon:'🐋',label:'W Sound',symbol:'/w/',desc:'as in <em>whale</em>, <em>win</em>, <em>web</em>',speak:'W sound, as in whale, win, web'},
+   ],ex:'W is for Whale. W, Whale!'},
+  {l:'X',w:'Xylophone',e:'🎵',
+   sounds:[
+    {type:'short',icon:'🎵',label:'X = Z',  symbol:'/z/',desc:'X says Z at start: <em>xylophone</em>, <em>xerox</em>',speak:'X says Z at the start, like xylophone'},
+    {type:'long', icon:'🦊',label:'X = KS', symbol:'/ks/',desc:'X says KS at end: <em>fox</em>, <em>box</em>, <em>mix</em>',speak:'X says K S at the end, like fox, box, mix'},
+   ],ex:'X is for Xylophone. X, Xylophone!'},
+  {l:'Y',w:'Yacht',e:'⛵',
+   sounds:[
+    {type:'short',icon:'⛵',label:'Y Consonant',symbol:'/j/',desc:'as in <em>yacht</em>, <em>yes</em>, <em>yell</em>',speak:'Y consonant, as in yacht, yes, yell'},
+    {type:'long', icon:'🌞',label:'Y = Long E',symbol:'/ē/',desc:'Y says long E: <em>happy</em>, <em>funny</em>, <em>baby</em>',speak:'Y says long E, like happy, funny, baby'},
+    {type:'other',icon:'🍬',label:'Y = Long I',symbol:'/ī/',desc:'Y says long I: <em>fly</em>, <em>sky</em>, <em>cry</em>',speak:'Y says long I, like fly, sky, cry'},
+   ],ex:'Y is for Yacht. Y, Yacht!'},
+  {l:'Z',w:'Zebra',e:'🦓',
+   sounds:[
+    {type:'short',icon:'🦓',label:'Z Sound',symbol:'/z/',desc:'as in <em>zebra</em>, <em>zip</em>, <em>zoo</em>',speak:'Z sound, as in zebra, zip, zoo'},
+   ],ex:'Z is for Zebra. Z, Zebra!'},
 ];
 
 // ═══════════════════════════════════════════════════
@@ -486,7 +691,6 @@ const LETTERS=[
 let curIdx=0,mode='learn',stars=0,learned=0,answered=false,mc=0;
 let isListening=false,recog=null;
 
-// Build alphabet bar
 function buildAlphaBar(){
   const bar=document.getElementById('alphaBar');
   bar.innerHTML='';
@@ -518,13 +722,25 @@ function setMode(m){
 }
 
 // ═══════════════════════════════════════════════════
-//  LEARN PANEL
+//  LEARN PANEL — with rich phonics cards
 // ═══════════════════════════════════════════════════
 function showLearnPanel(){
   const L=LETTERS[curIdx];
   document.getElementById('topTitle').textContent=`📖 Learning "${L.l}"`;
   document.getElementById('topSub').textContent=`${L.l} is for ${L.w}!`;
   answered=false;
+
+  const phonicsCardsHTML=L.sounds.map((s,i)=>`
+    <div class="phonics-card ${s.type}-sound" onclick="hearPhonics(${curIdx},${i})">
+      <div class="pc-icon">${s.icon}</div>
+      <div class="pc-body">
+        <div class="pc-label ${s.type==='short'?'short':s.type==='long'?'long':'other'}">${s.label}</div>
+        <div class="pc-sound">${s.symbol}</div>
+        <div class="pc-examples">${s.desc}</div>
+      </div>
+      <button class="hear-sound-btn" onclick="event.stopPropagation();hearPhonics(${curIdx},${i})">🔊 Hear</button>
+    </div>
+  `).join('');
 
   const panel=document.getElementById('lesson-panel');
   panel.innerHTML=`
@@ -533,10 +749,13 @@ function showLearnPanel(){
       <div class="big-letter">${L.l}</div>
       <div class="letter-word">${L.l} is for ${L.w}</div>
       <div class="letter-emoji">${L.e}</div>
-      <div class="letter-phonics">🔊 Sound: ${L.ph} — ${L.phWord}</div>
+      <div class="phonics-section">
+        <div class="phonics-title">🔤 Phonics Sounds</div>
+        <div class="phonics-cards">${phonicsCardsHTML}</div>
+      </div>
       <div class="letter-sentence">"${L.ex}"</div>
     </div>
-    <div class="buddy-says" id="buddySays">Hi! I'm Buddy! Today we learn the letter ${L.l}! ${L.l} is for ${L.w}! ${L.e}</div>
+    <div class="buddy-says" id="buddySays">Hi! I'm Buddy! Today we learn the letter ${L.l}! Tap any sound card to hear it! 🐻</div>
     <div class="action-row">
       <button class="abtn hear" onclick="hearLetter()">🔊 Hear it!</button>
       <button class="abtn next" onclick="nextLetter()" id="nextBtn">Next Letter ➜</button>
@@ -546,14 +765,28 @@ function showLearnPanel(){
   setTimeout(()=>teachLetter(L), 400);
 }
 
+function hearPhonics(letterIdx, soundIdx){
+  const L=LETTERS[letterIdx];
+  const s=L.sounds[soundIdx];
+  const text=`${s.label}! ${s.symbol}. ${s.speak}. Can you say it?`;
+  setState('speaking');
+  speakText(text,()=>{setState('idle');});
+  // Update buddy says
+  const bs=document.getElementById('buddySays');
+  if(bs) bs.textContent=`${s.label}: ${s.symbol} — ${s.speak}`;
+}
+
 function teachLetter(L){
-  speakText(`${L.l}! ${L.l} is for ${L.w}! ${L.e}. ${L.l}, ${L.w}. Can you say ${L.l}?`,()=>{});
+  const mainSound=L.sounds[0];
+  const allSounds=L.sounds.map(s=>s.speak).join('. Also, ');
+  speakText(`${L.l}! ${L.l} is for ${L.w}! ${allSounds}. Can you say ${L.l}?`,()=>{});
   setState('speaking');
 }
 
 function hearLetter(){
   const L=LETTERS[curIdx];
-  speakText(`${L.l}! ${L.l} for ${L.w}! ${L.l}, ${L.l}, ${L.l}!`,()=>{setState('idle');});
+  const allSounds=L.sounds.map(s=>s.speak).join('. ');
+  speakText(`${L.l}! ${L.l} for ${L.w}! Sounds: ${allSounds}`,()=>{setState('idle');});
 }
 
 // ═══════════════════════════════════════════════════
@@ -565,7 +798,6 @@ function showQuizPanel(){
   document.getElementById('topSub').textContent=`Which letter makes this sound?`;
   answered=false;
 
-  // Make 3 wrong choices
   let opts=[L.l];
   while(opts.length<4){const r=LETTERS[Math.floor(Math.random()*26)].l;if(!opts.includes(r))opts.push(r);}
   opts.sort(()=>Math.random()-.5);
@@ -576,54 +808,45 @@ function showQuizPanel(){
     <div class="letter-hero" style="padding:14px 14px 12px;">
       <div class="letter-emoji" style="font-size:72px;margin:0 0 8px;">${L.e}</div>
       <div class="letter-word" style="font-size:22px;">${L.w}</div>
-      <div class="letter-phonics" style="margin-top:6px;">Sound: ${L.ph}</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;width:100%;">
+        ${L.sounds.map(s=>`<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:7px 12px;font-size:12px;color:rgba(255,255,255,.75);font-weight:700;">${s.symbol} — ${s.label}</div>`).join('')}
+      </div>
     </div>
-    <div class="buddy-says" id="buddySays">Which letter is "${L.l.toLowerCase()}"? Tap the right letter! 🎯</div>
+    <div class="buddy-says" id="buddySays">Which letter makes these sounds? Tap the right letter! 🎯</div>
     <div class="choices-wrap" id="choicesWrap">
       ${opts.map(o=>`<button class="choice" onclick="checkAnswer('${o}','${L.l}',this)">${o}</button>`).join('')}
     </div>
     <button class="abtn next" onclick="nextLetter()" id="nextBtn" disabled style="margin-top:0;">Next ➜</button>
   `;
 
-  speakText(`Which letter is this? ${L.w} starts with the letter… can you find it?`,()=>{});
+  speakText(`Which letter is this? ${L.w} starts with which letter? Find it!`,()=>{});
 }
 
 function checkAnswer(chosen,correct,btn){
   if(answered)return;
   answered=true;
   const L=LETTERS[curIdx];
-
-  // Highlight the chosen button
   if(btn) btn.classList.add(chosen===correct?'correct':'wrong');
-
-  // Always highlight the correct answer clearly
   if(chosen!==correct){
     document.querySelectorAll('.choice').forEach(b=>{
       if(b.textContent.trim()===correct) b.classList.add('correct');
     });
   }
-
-  // Disable all choices after answering
   document.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');
 
   if(chosen===correct){
-    stars+=2;
-    document.getElementById('starCount').textContent=stars;
-    learned++;
-    document.getElementById('lessonCount').textContent=learned;
-    const buddySaysEl=document.getElementById('buddySays');
-    if(buddySaysEl) buddySaysEl.textContent=`Amazing! ${correct} is correct! ${correct} is for ${L.w}! You got 2 stars! Well done!`;
-    setState('excited');
-    confetti();
-    speakText(`Yes! Amazing! ${correct}! ${correct} is for ${L.w}! You are so smart! You earned 2 stars! Well done!`,()=>{setState('idle');});
+    stars+=2;document.getElementById('starCount').textContent=stars;
+    learned++;document.getElementById('lessonCount').textContent=learned;
+    const bs=document.getElementById('buddySays');
+    if(bs) bs.textContent=`Amazing! ${correct} is correct! You got 2 stars! Well done!`;
+    setState('excited');confetti();
+    speakText(`Yes! Amazing! ${correct}! ${correct} is for ${L.w}! You earned 2 stars!`,()=>{setState('idle');});
   } else {
-    const buddySaysEl=document.getElementById('buddySays');
-    if(buddySaysEl) buddySaysEl.textContent=`Almost! The letter is ${correct}. ${correct} is for ${L.w}. You will get it next time!`;
-    speakText(`Oops! The answer is ${correct}. ${correct} is for ${L.w}. Keep trying, you can do it!`,()=>{setState('idle');});
+    const bs=document.getElementById('buddySays');
+    if(bs) bs.textContent=`Almost! The letter is ${correct}. ${correct} is for ${L.w}. You will get it next time!`;
+    speakText(`Oops! The answer is ${correct}. ${correct} is for ${L.w}. Keep trying!`,()=>{setState('idle');});
   }
-
-  const nextBtn=document.getElementById('nextBtn');
-  if(nextBtn) nextBtn.disabled=false;
+  const nb=document.getElementById('nextBtn');if(nb) nb.disabled=false;
 }
 
 // ═══════════════════════════════════════════════════
@@ -633,7 +856,7 @@ function showChatPanel(){
   document.getElementById('topTitle').textContent='💬 Chat with Buddy';
   document.getElementById('topSub').textContent='Ask Buddy anything about letters!';
   document.getElementById('lesson-panel').innerHTML=`<div class="chat-wrap" id="chatWrap"></div>`;
-  addChatMsg(`Hi there! 👋 I'm Buddy your owl tutor! Ask me about any letter, phonics sound, or just say hello! You can also tap the mic to speak! 🎙️`,'b');
+  addChatMsg(`Hi there! 👋 I'm Buddy your teddy bear tutor! 🐻 Ask me about any letter, phonics sound, or just say hello! You can also tap the mic to speak! 🎙️`,'b');
 }
 
 function addChatMsg(text,role,html=''){
@@ -641,7 +864,7 @@ function addChatMsg(text,role,html=''){
   if(!wrap){document.getElementById('lesson-panel').innerHTML='<div class="chat-wrap" id="chatWrap"></div>';wrap=document.getElementById('chatWrap');}
   const id='m'+(++mc),now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),isB=role==='b';
   const row=document.createElement('div');row.className='mr'+(isB?'':' u');row.id=id;
-  const av=document.createElement('div');av.className='mav'+(isB?'':' u');av.textContent=isB?'🦉':'👤';
+  const av=document.createElement('div');av.className='mav'+(isB?'':' u');av.textContent=isB?'🐻':'👤';
   const bub=document.createElement('div');bub.className='bub '+(isB?'b':'u');
   if(html)bub.innerHTML=html;else bub.textContent=text;
   const mt=document.createElement('div');mt.className='mt';mt.textContent=now;
@@ -662,7 +885,6 @@ function getFV(){
 function speakText(text,onEnd){
   if(!('speechSynthesis'in window)){setState('idle');onEnd&&onEnd();return;}
   speechSynthesis.cancel();
-  // Remove emojis and special chars safely, keep words + punctuation
   const clean=text.replace(/[\uD800-\uDFFF]|[\u2600-\u27FF]|[\u{1F000}-\u{1FFFF}]/gu,' ')
     .replace(/[^\w\s,.!?'"%-]/g,' ').replace(/\s+/g,' ').trim().slice(0,400);
   if(!clean){setState('idle');onEnd&&onEnd();return;}
@@ -675,7 +897,6 @@ function speakText(text,onEnd){
     u.onerror=()=>{setState('idle');onEnd&&onEnd();};
     speechSynthesis.speak(u);
   };
-  // Small delay so speechSynthesis.cancel() has time to clear
   setTimeout(()=>{
     speechSynthesis.getVoices().length===0
       ?speechSynthesis.onvoiceschanged=(()=>{go();speechSynthesis.onvoiceschanged=null;})
@@ -684,365 +905,162 @@ function speakText(text,onEnd){
 }
 
 // ═══════════════════════════════════════════════════
-//  MIC PERMISSION — prime via getUserMedia first
-//  This is the correct way to trigger Chrome's
-//  permission popup reliably on HTTPS pages
+//  MIC PERMISSION
 // ═══════════════════════════════════════════════════
+let micPermissionGranted=false;
 
-let micPermissionGranted = false;
-
-// Show the modal on load unless already granted
 async function initMicPermission(){
-  // Check if already granted
   if(navigator.permissions){
     try{
-      const s = await navigator.permissions.query({name:'microphone'});
-      if(s.state === 'granted'){
-        micPermissionGranted = true;
-        hideMicModal();
-        return;
-      }
-      if(s.state === 'denied'){
-        // Already permanently blocked — show modal with fix instructions
-        showBlockedInstructions();
-        return;
-      }
-      // state === 'prompt' — show our friendly modal first
-      showMicModal();
-      return;
-    } catch(e){}
+      const s=await navigator.permissions.query({name:'microphone'});
+      if(s.state==='granted'){micPermissionGranted=true;hideMicModal();return;}
+      if(s.state==='denied'){showBlockedInstructions();return;}
+      showMicModal();return;
+    }catch(e){}
   }
-  // Permissions API not available — show modal to be safe
   showMicModal();
 }
 
-function showMicModal(){
-  document.getElementById('micModal').style.display='flex';
-}
-function hideMicModal(){
-  document.getElementById('micModal').style.display='none';
-}
-function dismissMicModal(){
-  hideMicModal();
-  micToast('💬 No problem! Use the text box to chat with Buddy.','#6BCB77');
-}
+function showMicModal(){const m=document.getElementById('micModal');m.style.display='flex';}
+function hideMicModal(){document.getElementById('micModal').style.display='none';}
+function dismissMicModal(){hideMicModal();micToast('💬 No problem! Use the text box to chat with Buddy.','#6BCB77');}
 
 function showBlockedInstructions(){
-  const modal = document.getElementById('micModal');
-  modal.style.display = 'flex';
-  modal.querySelector('div > div').innerHTML = `
+  const modal=document.getElementById('micModal');
+  modal.style.display='flex';
+  modal.querySelector('div > div').innerHTML=`
     <div style="font-size:48px;margin-bottom:12px;">🔒</div>
     <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#FF6B6B;margin-bottom:10px;">Microphone is blocked</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:20px;text-align:left;">
-      Chrome remembered <strong style="color:#FFD93D">Block</strong> for this site. Fix it in 3 steps:<br><br>
+      Chrome remembered <strong style="color:#FFD93D">Block</strong> for this site.<br><br>
       <strong style="color:#fff">1.</strong> Click the <strong style="color:#FFD93D">🔒 lock icon</strong> in your address bar<br>
       <strong style="color:#fff">2.</strong> Find <strong style="color:#FFD93D">Microphone</strong> → change to <strong style="color:#4ade80">Allow</strong><br>
       <strong style="color:#fff">3.</strong> <strong style="color:#FFD93D">Refresh this page</strong>
     </div>
-    <button onclick="location.reload()" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;margin-bottom:10px;">
-      🔄 Refresh Page
-    </button>
-    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
-      Skip — I'll type instead
-    </button>`;
+    <button onclick="location.reload()" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;margin-bottom:10px;">🔄 Refresh Page</button>
+    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">Skip — I'll type instead</button>`;
 }
 
 async function requestMicPermission(){
-  const status = document.getElementById('micModalStatus');
-  status.textContent = 'Asking Chrome for permission…';
-  status.style.color = '#FFD93D';
-
+  const status=document.getElementById('micModalStatus');
+  status.textContent='Asking Chrome for permission…';status.style.color='#FFD93D';
   try{
-    // getUserMedia is the ONLY reliable way to trigger Chrome's permission popup
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-    // Permission granted — stop the stream immediately (we only needed the prompt)
-    stream.getTracks().forEach(t => t.stop());
-    micPermissionGranted = true;
-    status.textContent = '✅ Microphone allowed!';
-    status.style.color = '#4ade80';
-    setTimeout(hideMicModal, 800);
-  } catch(err){
-    console.warn('getUserMedia error:', err.name, err.message);
-    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-      // User clicked Block in the popup, or it was already blocked
-      showBlockedInstructions();
-    } else if(err.name === 'NotFoundError'){
-      status.textContent = '❌ No microphone found — plug one in!';
-      status.style.color = '#FF6B6B';
-    } else {
-      status.textContent = 'Error: ' + err.message;
-      status.style.color = '#FF6B6B';
-    }
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    stream.getTracks().forEach(t=>t.stop());
+    micPermissionGranted=true;
+    status.textContent='✅ Microphone allowed!';status.style.color='#4ade80';
+    setTimeout(hideMicModal,800);
+  }catch(err){
+    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){showBlockedInstructions();}
+    else if(err.name==='NotFoundError'){status.textContent='❌ No microphone found!';status.style.color='#FF6B6B';}
+    else{status.textContent='Error: '+err.message;status.style.color='#FF6B6B';}
   }
 }
 
-// Show a friendly toast message (works in any mode)
-function micToast(msg, color='#FF6B6B'){
+function micToast(msg,color='#FF6B6B'){
   let t=document.getElementById('micToast');
   if(!t){t=document.createElement('div');t.id='micToast';
     t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 22px;border-radius:14px;font-family:Nunito,sans-serif;font-size:13.5px;font-weight:700;color:#fff;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
     document.body.appendChild(t);}
-  t.style.background=color;
-  t.style.opacity='1';
-  t.textContent=msg;
-  clearTimeout(t._timer);
-  t._timer=setTimeout(()=>t.style.opacity='0',3500);
+  t.style.background=color;t.style.opacity='1';t.textContent=msg;
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.opacity='0',3500);
 }
 
 function toggleListen(){
-  if(isListening){ stopListen(); return; }
+  if(isListening){stopListen();return;}
   if(!micPermissionGranted){
-    // Try to check permission state first
     if(navigator.permissions){
       navigator.permissions.query({name:'microphone'}).then(s=>{
-        if(s.state==='denied'){ showBlockedInstructions(); showMicModal(); }
-        else if(s.state==='prompt'){ showMicModal(); }
-        else { micPermissionGranted=true; startListen(); }
+        if(s.state==='denied'){showBlockedInstructions();showMicModal();}
+        else if(s.state==='prompt'){showMicModal();}
+        else{micPermissionGranted=true;startListen();}
       }).catch(()=>startListen());
-    } else {
-      startListen(); // Just try — browser will show native prompt
-    }
-    return;
-  }
-  startListen();
-}
-
-// Step 1: check permission first using Permissions API if available
-async function checkMicAndStart(){
-  // Must be HTTPS or localhost — file:// won't work
-  if(location.protocol==='file:'){
-    micToast('⚠️ Open this page via http:// or https:// — mic does not work from a file:// URL');
-    return;
-  }
-  // Check browser support
-  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
-    micToast('🎙️ Voice needs Chrome or Edge browser. Try typing below!');
+    }else{startListen();}
     return;
   }
   startListen();
 }
 
 function startListen(){
-  // Cancel any ongoing TTS so it doesn't clash with STT
   speechSynthesis.cancel();
-  if(recog){try{recog.abort();}catch(e){} recog=null;}
-
-  setState('listening');
-  isListening=true;
-  let gotResult=false;
-  let retries=0;
-  const MAX_RETRIES=1;
-
+  if(recog){try{recog.abort();}catch(e){}recog=null;}
+  setState('listening');isListening=true;let gotResult=false,retries=0;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-
   function doStart(){
-    recog=new SR();
-    recog.continuous=false;
-    recog.interimResults=true;
-    recog.lang='en-US';
-    recog.maxAlternatives=3;
-
-    recog.onstart=()=>{
-      showLiveT('Listening… speak now!');
-    };
-
+    recog=new SR();recog.continuous=false;recog.interimResults=true;recog.lang='en-US';recog.maxAlternatives=3;
+    recog.onstart=()=>{showLiveT('Listening… speak now!');};
     recog.onresult=e=>{
       let interim='',final='';
-      for(const r of e.results){
-        if(r.isFinal) final+=r[0].transcript;
-        else interim+=r[0].transcript;
-      }
+      for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript;}
       showLiveT(final||interim);
-      if(final){
-        gotResult=true;
-        stopListen();
-        handleVoiceInput(final.trim());
-      }
+      if(final){gotResult=true;stopListen();handleVoiceInput(final.trim());}
     };
-
-    recog.onspeechend=()=>{
-      // Browser detected end of speech — let onresult fire first
-      setTimeout(()=>{ if(!gotResult && recog) recog.stop(); },300);
-    };
-
+    recog.onspeechend=()=>{setTimeout(()=>{if(!gotResult&&recog)recog.stop();},300);};
     recog.onerror=e=>{
-      console.warn('STT error:', e.error);
-      if(e.error==='no-speech'){
-        if(retries<MAX_RETRIES){
-          retries++;
-          showLiveT('I didn\'t hear you — try again!');
-          setTimeout(doStart, 400);
-          return;
-        }
-        stopListen();
-        micToast('🎙️ I didn\'t hear anything. Tap the mic and speak clearly!','#6BCB77');
-        return;
-      }
+      if(e.error==='no-speech'){if(retries<1){retries++;showLiveT('I didn\'t hear you — try again!');setTimeout(doStart,400);return;}stopListen();micToast('🎙️ I didn\'t hear anything. Try again!','#6BCB77');return;}
       stopListen();
-      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
-        micPermissionGranted=false;
-        showBlockedInstructions();
-        showMicModal();
-        return;
-      }
-      const msgs={
-        'not-found':    '🎙️ No microphone found. Plug in a mic and try again.',
-        'network':      '🌐 Network error. Check your internet connection and try again.',
-        'aborted':      '',
-        'audio-capture':'🎙️ Mic is used by another app. Close it and try again.',
-      };
-      const msg=msgs[e.error];
-      if(msg) micToast(msg);
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){micPermissionGranted=false;showBlockedInstructions();showMicModal();return;}
+      const msgs={'not-found':'🎙️ No microphone found.','network':'🌐 Network error.','aborted':'','audio-capture':'🎙️ Mic is used by another app.'};
+      const msg=msgs[e.error];if(msg)micToast(msg);
     };
-
-    recog.onend=()=>{
-      if(!gotResult && isListening){
-        // ended without result and no error — usually means mic access was just granted
-        // try once more
-        if(retries<MAX_RETRIES){
-          retries++;
-          setTimeout(doStart,300);
-        } else {
-          stopListen();
-        }
-      }
-    };
-
-    try{ recog.start(); }
-    catch(err){
-      stopListen();
-      if(err.name==='InvalidStateError'){
-        // Already started — abort and retry
-        setTimeout(()=>{try{recog&&recog.abort();}catch(e){}recog=null;startListen();},300);
-      } else {
-        micToast('Mic error: '+err.message+'. Try refreshing the page.');
-      }
-    }
+    recog.onend=()=>{if(!gotResult&&isListening){if(retries<1){retries++;setTimeout(doStart,300);}else{stopListen();}}};
+    try{recog.start();}catch(err){stopListen();}
   }
-
   doStart();
 }
 
 function stopListen(){
-  isListening=false;
-  if(recog){try{recog.abort();}catch(e){} recog=null;}
-  showLiveT('');
-  if(A.state==='listening') setState('idle');
+  isListening=false;if(recog){try{recog.abort();}catch(e){}recog=null;}
+  showLiveT('');if(A.state==='listening')setState('idle');
 }
 function showLiveT(t){const el=document.getElementById('liveT'),tx=document.getElementById('ltText');if(t){el.classList.add('show');tx.textContent=t;}else el.classList.remove('show');}
 
 async function handleVoiceInput(text){
-  const upper=text.trim().toUpperCase();
-  const lower=text.trim().toLowerCase();
-
-  // ── QUIZ MODE: check if the spoken answer matches a letter choice ──
-  if(mode==='quiz' && !answered){
-    // Accept single letter ("A", "bee", "the letter B", "I think it's C")
+  const upper=text.trim().toUpperCase();const lower=text.trim().toLowerCase();
+  if(mode==='quiz'&&!answered){
     const spokenLetter=extractLetter(text);
     if(spokenLetter){
       const L=LETTERS[curIdx];
-      // Simulate clicking the matching choice button
       const btns=[...document.querySelectorAll('.choice')];
       const matchBtn=btns.find(b=>b.textContent.trim()===spokenLetter);
-      if(matchBtn){
-        checkAnswer(spokenLetter, L.l, matchBtn);
-        return;
-      }
+      if(matchBtn){checkAnswer(spokenLetter,L.l,matchBtn);return;}
     }
   }
-
-  // ── LEARN MODE: confirm the letter they said and teach it ──
   if(mode==='learn'){
     const spokenLetter=extractLetter(text);
     if(spokenLetter){
       const idx=LETTERS.findIndex(x=>x.l===spokenLetter);
-      if(idx>=0){
-        selectLetter(idx);
-        const L=LETTERS[idx];
-        setTimeout(()=>speakText(`Yes! ${L.l}! ${L.l} is for ${L.w}! Great job saying ${L.l}!`,()=>{}),400);
-        return;
-      }
+      if(idx>=0){selectLetter(idx);const L=LETTERS[idx];setTimeout(()=>speakText(`Yes! ${L.l}! ${L.l} is for ${L.w}! Great job!`,()=>{}),400);return;}
     }
-    // They said the word (e.g. "Apple")
     const wordMatch=LETTERS.find(x=>lower.includes(x.w.toLowerCase()));
-    if(wordMatch){
-      const idx=LETTERS.indexOf(wordMatch);
-      selectLetter(idx);
-      setTimeout(()=>speakText(`${wordMatch.w}! That starts with the letter ${wordMatch.l}! ${wordMatch.l} for ${wordMatch.w}! Amazing!`,()=>{}),400);
-      return;
-    }
+    if(wordMatch){const idx=LETTERS.indexOf(wordMatch);selectLetter(idx);setTimeout(()=>speakText(`${wordMatch.w}! That starts with ${wordMatch.l}! Amazing!`,()=>{}),400);return;}
   }
-
-  // ── CHAT MODE or unrecognised: send to AI ──
-  if(mode!=='chat') setMode('chat');
-  addChatMsg(text,'u');
-  showLiveT('');
-  setState('thinking');
+  if(mode!=='chat')setMode('chat');
+  addChatMsg(text,'u');showLiveT('');setState('thinking');
   const lid=addChatMsg('','b','<div class="dl-wrap"><div class="dl"></div><div class="dl"></div><div class="dl"></div></div>');
-
-  // ⚠️ IMPORTANT: Replace the value below with your actual Anthropic API key
-  // Get one free at: https://console.anthropic.com
-  const API_KEY = 'Killer';
-
-  if(!API_KEY || API_KEY === 'Killer'){
+  const API_KEY='Killer';
+  if(!API_KEY||API_KEY==='Killer'){
     removeMsg(lid);
     const fb=`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
-    addChatMsg('💡 Add your Anthropic API key to the code to enable AI chat! For now: '+fb,'b');
-    speakText(fb,()=>{});
-    return;
+    addChatMsg('💡 Add your Anthropic API key to enable AI chat! For now: '+fb,'b');
+    speakText(fb,()=>{});return;
   }
-
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-iab': 'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:200,
-        system:`You are Buddy, an enthusiastic friendly owl tutor for kids aged 3-8. You teach A-Z alphabets and phonics.
-- Keep answers SHORT (2-3 sentences max). Very simple words only.
-- Always be warm, encouraging, and fun. Use exclamation marks!
-- If asked about a letter, say: the letter name, a word starting with it, and encourage them
-- End with a fun question or encouragement
-- No complex vocabulary, no markdown, no bullet points — plain speech only`,
-        messages:[{role:'user',content:text}]
-      })
-    });
-    const d=await r.json();
-    removeMsg(lid);
-    const reply=d.content?.[0]?.text||`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
-    addChatMsg(reply,'b');
-    speakText(reply,()=>{});
-  }catch(e){
-    removeMsg(lid);
-    const fb=`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
-    addChatMsg(fb,'b');
-    speakText(fb,()=>{});
-  }
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-iab':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:`You are Buddy, a friendly teddy bear tutor for kids aged 3-8. Teach A-Z alphabets and phonics.\n- Keep answers SHORT (2-3 sentences). Very simple words only.\n- Always warm, encouraging, and fun!\n- For phonics questions, explain short and long sounds simply\n- End with a fun question or encouragement\n- No markdown, no bullet points — plain speech only`,messages:[{role:'user',content:text}]})});
+    const d=await r.json();removeMsg(lid);
+    const reply=d.content?.[0]?.text||`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}!`;
+    addChatMsg(reply,'b');speakText(reply,()=>{});
+  }catch(e){removeMsg(lid);const fb=`${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;addChatMsg(fb,'b');speakText(fb,()=>{});}
 }
 
-// Helper: extract a single spoken letter from text like "A", "the letter B", "I think C", "bee", "ay"
 function extractLetter(text){
   const upper=text.trim().toUpperCase();
-  // Direct single letter
-  if(/^[A-Z]$/.test(upper)) return upper;
-  // "The letter X" or "letter X"
+  if(/^[A-Z]$/.test(upper))return upper;
   const m1=upper.match(/\bLETTER\s+([A-Z])\b/);if(m1)return m1[1];
-  // "I think it's X" / "it is X" / "answer is X"
   const m2=upper.match(/\b(?:IS|IT'S|ITS|THINK|ANSWER|CHOOSE|PICK|SAY)\s+([A-Z])\b/);if(m2)return m2[1];
-  // Phonetic alphabet names → letter (b→B, c→C, etc.)
-  const phonetic={'AY':'A','BEE':'B','CEE':'C','DEE':'D','EE':'E','EF':'F','GEE':'G',
-    'HI':'H','AITCH':'H','EYE':'I','JAY':'J','KAY':'K','EL':'L','EM':'M',
-    'EN':'N','OH':'O','PEE':'P','CUE':'Q','QUE':'Q','AR':'R','ESS':'S',
-    'TEE':'T','YOU':'U','VEE':'V','WE':'W','EX':'X','WHY':'Y','ZEE':'Z','ZED':'Z'};
+  const phonetic={'AY':'A','BEE':'B','CEE':'C','DEE':'D','EE':'E','EF':'F','GEE':'G','HI':'H','AITCH':'H','EYE':'I','JAY':'J','KAY':'K','EL':'L','EM':'M','EN':'N','OH':'O','PEE':'P','CUE':'Q','QUE':'Q','AR':'R','ESS':'S','TEE':'T','YOU':'U','VEE':'V','WE':'W','EX':'X','WHY':'Y','ZEE':'Z','ZED':'Z'};
   const words=upper.replace(/[^A-Z\s]/g,'').trim().split(/\s+/);
-  // Single word phonetic
   if(words.length===1&&phonetic[words[0]])return phonetic[words[0]];
-  // Last word in sentence might be the letter
   const last=words[words.length-1];
   if(/^[A-Z]$/.test(last))return last;
   if(phonetic[last])return phonetic[last];
@@ -1051,13 +1069,10 @@ function extractLetter(text){
 
 function sendText(){const inp=document.getElementById('ci'),t=inp.value.trim();if(!t)return;inp.value='';handleVoiceInput(t);}
 document.getElementById('ci').addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
-
 function prevLetter(){selectLetter(Math.max(0,curIdx-1));}
 function nextLetter(){selectLetter(Math.min(25,curIdx+1));}
-
 function clearChat(){if(mode==='chat')showChatPanel();else if(mode==='learn')showLearnPanel();else showQuizPanel();}
 
-// CONFETTI
 function confetti(){
   const colors=['#FFD93D','#FF6B6B','#6BCB77','#6EC6F5','#c77dff'];
   for(let i=0;i<18;i++){
@@ -1068,19 +1083,17 @@ function confetti(){
 }
 if(!document.getElementById('fallStyle')){const s=document.createElement('style');s.id='fallStyle';s.textContent='@keyframes fall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}';document.head.appendChild(s);}
 
-// INIT
 window.addEventListener('load',()=>{
-  // Check/request mic permission on load so Chrome popup fires at right time
+  // Wire modal buttons safely after DOM is ready
+  document.getElementById('modalAllowBtn')?.addEventListener('click', requestMicPermission);
+  document.getElementById('modalSkipBtn')?.addEventListener('click', dismissMicModal);
   initMicPermission();
   setState('greeting');
   showLearnPanel();
   setTimeout(()=>{
-    const g=`Hello! I'm Buddy your owl teacher! 🦉 Let's learn the alphabet together! Today we start with the letter ${LETTERS[0].l}! ${LETTERS[0].l} is for ${LETTERS[0].w}! ${LETTERS[0].e} Tap the mic to speak or tap any letter below!`;
-    speakText(g,()=>{});
+    speakText(`Hello! I'm Buddy your teddy bear teacher! Let's learn the alphabet together! Today we start with the letter ${LETTERS[0].l}! ${LETTERS[0].l} is for ${LETTERS[0].w}! Tap any sound card to hear the phonics! Tap the mic to speak!`,()=>{});
   },700);
 });
 </script>
 </body>
 </html>
-
-
