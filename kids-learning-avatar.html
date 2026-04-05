@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Kids Learning Avatar</title>
+</head>
+<body>
+    <header>
+        <h1>Kids Learning Avatar</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Select an Avatar</h2>
+            <div class="avatar-container" role="group" aria-labelledby="avatar-selection">
+                <button class="avatar" aria-label="Avatar 1" tabindex="0">
+                    <img src="avatar1.png" alt="Avatar 1">
+                </button>
+                <button class="avatar" aria-label="Avatar 2" tabindex="0">
+                    <img src="avatar2.png" alt="Avatar 2">
+                </button>
+                <button class="avatar" aria-label="Avatar 3" tabindex="0">
+                    <img src="avatar3.png" alt="Avatar 3">
+                </button>
+            </div>
+        </section>
+        <section>
+            <h2>Your Selection</h2>
+            <div id="selected-avatar"></div>
+        </section>
+    </main>
+    <script>
+        document.querySelectorAll('.avatar').forEach(avatar => {
+            avatar.addEventListener('click', function() {
+                const selectedAvatar = this.querySelector('img').alt;
+                document.getElementById('selected-avatar').textContent = 'You selected ' + selectedAvatar;
+            });
+        });
+
+        // Add keyboard accessibility for selection
+        document.querySelectorAll('.avatar').forEach(avatar => {
+            avatar.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    this.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
