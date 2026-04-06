@@ -14,723 +14,956 @@
   --border:rgba(255,255,255,0.1);--glass:rgba(255,255,255,0.06);
   --shadow:0 8px 32px rgba(0,0,0,0.4);
   --bear-body:#c68642;--bear-dark:#8b5e3c;--bear-light:#e8a96a;
-  --bear-snout:#f5cba7;--bear-nose:#3d1c02;--bear-ear:#b5763a;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{font-family:'Nunito',sans-serif;background:var(--sky3);color:var(--white);overflow:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--sky3);color:var(--white);touch-action:manipulation;}
 body::before{content:'';position:fixed;inset:0;background:
   radial-gradient(ellipse 80% 50% at 30% 20%,rgba(108,203,255,.08) 0%,transparent 60%),
   radial-gradient(ellipse 60% 50% at 70% 80%,rgba(199,125,255,.07) 0%,transparent 60%);
   pointer-events:none;z-index:0;}
 
-#app{position:relative;z-index:1;display:grid;grid-template-columns:360px 1fr;height:100vh;max-width:1300px;margin:0 auto;}
+/* ── LAYOUT ── */
+#app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;max-width:900px;margin:0 auto;}
 
-/* LEFT */
-#left{background:rgba(15,30,56,.95);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-.ptop{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--sun),var(--coral));display:flex;align-items:center;justify-content:center;font-size:20px;}
-.appname{font-family:'Fredoka One',cursive;font-size:20px;color:var(--white);}
-.appsub{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;}
+/* ── TOP NAV ── */
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(10,18,40,.97);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;z-index:10;}
+.logo-row{display:flex;align-items:center;gap:8px;}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--sun),var(--coral));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.appname{font-family:'Fredoka One',cursive;font-size:18px;color:var(--white);}
+.appsub{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-right{display:flex;align-items:center;gap:6px;}
+.star-pill{background:rgba(255,217,61,.12);border:1.5px solid rgba(255,217,61,.25);border-radius:50px;padding:4px 10px;font-size:11px;font-weight:800;color:var(--sun);white-space:nowrap;}
 
-/* BUDDY STAGE */
-.stage{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:6px;overflow:hidden;position:relative;
-  background:radial-gradient(ellipse 80% 70% at 50% 55%,rgba(198,134,66,.06) 0%,transparent 70%);}
-#buddyCanvas{display:block;}
+/* LANG SWITCHER */
+.lang-wrap{display:flex;gap:3px;}
+.langbtn{padding:5px 9px;border-radius:8px;border:1.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-size:11px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .18s;white-space:nowrap;}
+.langbtn.active{background:rgba(255,217,61,.15);border-color:rgba(255,217,61,.4);color:var(--sun);}
 
-.srow{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:5px 14px;font-size:12px;color:var(--sun);font-weight:700;margin:2px 0 4px;font-family:'Nunito',sans-serif;}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:sdp 1.5s infinite;}
+/* ── CONTENT AREA ── */
+#content{flex:1;display:flex;overflow:hidden;}
+
+/* ── LEFT SIDEBAR (desktop) ── */
+#left{width:200px;flex-shrink:0;background:rgba(15,30,56,.95);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:8px;overflow:hidden;position:relative;}
+#buddyCanvas{display:block;width:180px!important;height:200px!important;}
+
+.srow{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:4px 12px;font-size:11px;color:var(--sun);font-weight:700;margin:2px 0 3px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:sdp 1.5s infinite;flex-shrink:0;}
 .sdot.sp{background:var(--sun);animation:sdp .35s infinite;}
 .sdot.th{background:var(--blue);animation:sdp .7s infinite;}
 .sdot.li{background:var(--coral);animation:sdp .3s infinite;}
 @keyframes sdp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
 
-.viz{display:flex;gap:3px;align-items:center;height:28px;margin-bottom:2px;opacity:0;transition:opacity .3s;}
+.viz{display:flex;gap:3px;align-items:center;height:24px;opacity:0;transition:opacity .3s;}
 .viz.on{opacity:1;}
 .vb{width:4px;border-radius:2px;background:linear-gradient(to top,var(--sun),#fff59d);animation:vba .5s ease infinite;}
-.vb:nth-child(1){height:6px}.vb:nth-child(2){height:13px;animation-delay:.05s}.vb:nth-child(3){height:20px;animation-delay:.1s}
-.vb:nth-child(4){height:26px;animation-delay:.15s}.vb:nth-child(5){height:20px;animation-delay:.2s}
-.vb:nth-child(6){height:13px;animation-delay:.25s}.vb:nth-child(7){height:6px;animation-delay:.3s}
+.vb:nth-child(1){height:6px}.vb:nth-child(2){height:12px;animation-delay:.05s}.vb:nth-child(3){height:18px;animation-delay:.1s}
+.vb:nth-child(4){height:22px;animation-delay:.15s}.vb:nth-child(5){height:18px;animation-delay:.2s}
+.vb:nth-child(6){height:12px;animation-delay:.25s}.vb:nth-child(7){height:6px;animation-delay:.3s}
 @keyframes vba{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 
-.uviz{display:flex;gap:3px;align-items:center;height:28px;margin-bottom:2px;opacity:0;transition:opacity .3s;}
+.uviz{display:flex;gap:3px;align-items:center;height:24px;opacity:0;transition:opacity .3s;}
 .uviz.on{opacity:1;}
 .uvb{width:4px;border-radius:2px;background:linear-gradient(to top,var(--coral),#ffb3b3);animation:vba .3s ease infinite;}
-.uvb:nth-child(1){height:8px}.uvb:nth-child(2){height:17px;animation-delay:.04s}.uvb:nth-child(3){height:25px;animation-delay:.08s}
-.uvb:nth-child(4){height:28px;animation-delay:.12s}.uvb:nth-child(5){height:25px;animation-delay:.16s}
-.uvb:nth-child(6){height:17px;animation-delay:.2s}.uvb:nth-child(7){height:8px;animation-delay:.24s}
+.uvb:nth-child(1){height:8px}.uvb:nth-child(2){height:16px;animation-delay:.04s}.uvb:nth-child(3){height:22px;animation-delay:.08s}
+.uvb:nth-child(4){height:26px;animation-delay:.12s}.uvb:nth-child(5){height:22px;animation-delay:.16s}
+.uvb:nth-child(6){height:16px;animation-delay:.2s}.uvb:nth-child(7){height:8px;animation-delay:.24s}
 
-/* BIG MIC BUTTON */
-.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;margin:4px 0 6px;}
-#micBtn{width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;transition:all .22s;position:relative;background:linear-gradient(135deg,var(--sun),var(--coral));box-shadow:0 6px 22px rgba(255,107,107,.4);}
-#micBtn:hover{transform:scale(1.07);}
+.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0 5px;}
+#micBtn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .22s;position:relative;background:linear-gradient(135deg,var(--sun),var(--coral));box-shadow:0 6px 22px rgba(255,107,107,.4);}
 #micBtn.on{background:linear-gradient(135deg,var(--coral),#b91c1c);animation:mpulse .7s infinite;}
 #micBtn.speaking{background:linear-gradient(135deg,var(--blue),#1d4ed8);}
 @keyframes mpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.mring{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--sun);opacity:0;animation:mra 1.5s infinite;}
+.mring{position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--sun);opacity:0;animation:mra 1.5s infinite;}
 .mring2{animation-delay:.5s;}
 @keyframes mra{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.5);opacity:0}}
-.mlbl{font-size:11px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.5px;font-family:'Nunito',sans-serif;}
+.mlbl{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.5px;text-align:center;padding:0 6px;}
 .mlbl.on{color:var(--coral);}
 .mlbl.sp{color:var(--blue);}
 
-/* ALPHABET SCROLL */
-.alpha-bar-label{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;padding:4px 16px 4px;font-weight:600;}
-.alpha-bar{display:flex;overflow-x:auto;gap:5px;padding:0 14px 10px;scrollbar-width:none;}
-.alpha-bar::-webkit-scrollbar{display:none;}
-.ab{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:15px;color:rgba(255,255,255,.7);cursor:pointer;flex-shrink:0;transition:all .18s;}
-.ab:hover,.ab.active{background:linear-gradient(135deg,var(--sun),var(--coral));border-color:transparent;color:var(--sky3);transform:scale(1.1);}
+/* ALPHA SCROLL */
+.alpha-wrap{padding:4px 8px 8px;overflow:hidden;}
+.alpha-bar-label{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;padding:2px 2px 4px;font-weight:600;}
+.alpha-bar{display:flex;flex-wrap:wrap;gap:3px;}
+.ab{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;flex-shrink:0;transition:all .18s;}
+.ab:hover,.ab.active{background:linear-gradient(135deg,var(--sun),var(--coral));border-color:transparent;color:var(--sky3);}
 
 /* MODE TABS */
-.mode-tabs{display:flex;gap:6px;padding:4px 14px 8px;}
-.mtab{flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.55);font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .18s;text-align:center;}
+.mode-tabs{display:flex;gap:4px;padding:4px 8px 6px;}
+.mtab{flex:1;padding:6px 2px;border-radius:8px;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.55);font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all .18s;text-align:center;}
 .mtab.active{background:linear-gradient(135deg,rgba(255,217,61,.2),rgba(255,107,107,.15));border-color:rgba(255,217,61,.4);color:var(--sun);}
-.mtab:hover:not(.active){background:rgba(255,255,255,.06);}
 
-/* STARS */
-.stars-row{display:flex;justify-content:center;align-items:center;gap:6px;padding:0 14px 8px;}
-.star-badge{background:rgba(255,217,61,.12);border:1.5px solid rgba(255,217,61,.25);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--sun);}
+/* STATS */
+.stats-row{display:flex;gap:4px;padding:4px 8px 8px;}
+.stat-pill{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px;text-align:center;font-size:10px;font-weight:800;color:var(--sun);}
+.stat-pill span{display:block;font-size:15px;font-family:'Fredoka One',cursive;}
 
-/* RIGHT */
-#right{display:flex;flex-direction:column;overflow:hidden;}
-.topbar{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,18,40,.9);backdrop-filter:blur(10px);}
-.tbt{font-family:'Fredoka One',cursive;font-size:22px;color:var(--white);}
-.tbs{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;}
-.tbbtns{display:flex;gap:7px;}
-.tbb{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--border);background:var(--glass);color:rgba(255,255,255,.5);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.tbb:hover{border-color:rgba(255,217,61,.4);color:var(--sun);}
+/* ── RIGHT PANEL ── */
+#right{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.rbar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(10,18,40,.9);flex-shrink:0;}
+.rbar-t{font-family:'Fredoka One',cursive;font-size:16px;color:var(--white);}
+.rbar-s{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;}
+.rbar-btns{display:flex;gap:5px;}
+.rbb{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--glass);color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.rbb:hover{border-color:rgba(255,217,61,.4);color:var(--sun);}
 
-/* LESSON PANEL */
-#lesson-panel{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:0;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+#lesson-panel{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:0;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;-webkit-overflow-scrolling:touch;}
 #lesson-panel::-webkit-scrollbar{width:3px;}
 #lesson-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
 
 /* LETTER HERO */
-.letter-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 20px 16px;background:linear-gradient(135deg,rgba(255,217,61,.08),rgba(255,107,107,.06));border:1.5px solid rgba(255,217,61,.15);border-radius:24px;margin-bottom:16px;animation:pop .4s cubic-bezier(.34,1.56,.64,1);}
+.letter-hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 16px 14px;background:linear-gradient(135deg,rgba(255,217,61,.08),rgba(255,107,107,.06));border:1.5px solid rgba(255,217,61,.15);border-radius:20px;margin-bottom:14px;animation:pop .4s cubic-bezier(.34,1.56,.64,1);}
 @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
-.big-letter{font-family:'Fredoka One',cursive;font-size:100px;line-height:1;background:linear-gradient(135deg,var(--sun),var(--coral));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 4px 12px rgba(255,217,61,.3));}
-.letter-word{font-family:'Fredoka One',cursive;font-size:26px;color:var(--white);margin:4px 0;}
-.letter-emoji{font-size:52px;margin:4px 0;}
+.big-letter{font-family:'Fredoka One',cursive;font-size:80px;line-height:1;background:linear-gradient(135deg,var(--sun),var(--coral));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 4px 12px rgba(255,217,61,.3));}
+.letter-word{font-family:'Fredoka One',cursive;font-size:22px;color:var(--white);margin:3px 0;}
+.letter-emoji{font-size:44px;margin:3px 0;}
+.letter-trans{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 2px;}
+.trans-pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:4px 12px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85);}
+.trans-pill .tl{font-size:9px;color:rgba(255,255,255,.4);display:block;margin-bottom:1px;letter-spacing:1px;text-transform:uppercase;}
 
-/* ENHANCED PHONICS SECTION */
-.phonics-section{width:100%;margin-top:10px;}
-.phonics-title{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:700;}
-.phonics-cards{display:flex;flex-direction:column;gap:7px;width:100%;}
-.phonics-card{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .18s;text-align:left;}
-.phonics-card:hover{background:rgba(255,255,255,.1);border-color:rgba(255,217,61,.3);transform:translateX(3px);}
+.phonics-section{width:100%;margin-top:8px;}
+.phonics-title{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;font-weight:700;}
+.phonics-cards{display:flex;flex-direction:column;gap:6px;width:100%;}
+.phonics-card{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:9px 12px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;transition:all .18s;text-align:left;}
+.phonics-card:active{transform:scale(.97);}
 .phonics-card.short-sound{border-left:3px solid #6BCB77;}
 .phonics-card.long-sound{border-left:3px solid #6EC6F5;}
 .phonics-card.other-sound{border-left:3px solid #c77dff;}
-.pc-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
-.pc-body{flex:1;}
-.pc-label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.pc-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.pc-body{flex:1;min-width:0;}
+.pc-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
 .pc-label.short{color:#6BCB77;}
 .pc-label.long{color:#6EC6F5;}
 .pc-label.other{color:#c77dff;}
-.pc-sound{font-family:'Fredoka One',cursive;font-size:16px;color:var(--white);margin-bottom:3px;}
-.pc-examples{font-size:12px;color:rgba(255,255,255,.65);font-weight:600;line-height:1.5;}
+.pc-sound{font-family:'Fredoka One',cursive;font-size:14px;color:var(--white);margin-bottom:2px;}
+.pc-examples{font-size:11px;color:rgba(255,255,255,.65);font-weight:600;line-height:1.5;}
 .pc-examples em{color:var(--sun);font-style:normal;font-weight:800;}
-.hear-sound-btn{background:rgba(255,255,255,.1);border:none;border-radius:8px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.6);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all .15s;flex-shrink:0;margin-top:2px;}
-.hear-sound-btn:hover{background:rgba(255,217,61,.2);color:var(--sun);}
+.hear-sound-btn{background:rgba(255,255,255,.1);border:none;border-radius:7px;padding:4px 9px;font-size:11px;color:rgba(255,255,255,.6);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all .15s;flex-shrink:0;margin-top:2px;}
 
-.letter-sentence{font-size:14px;color:rgba(255,255,255,.7);margin-top:8px;line-height:1.5;font-weight:600;}
+.letter-sentence{font-size:13px;color:rgba(255,255,255,.7);margin-top:8px;line-height:1.5;font-weight:600;}
 
 /* CHOICES */
-.choices-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.choice{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 12px;font-family:'Fredoka One',cursive;font-size:22px;color:var(--white);cursor:pointer;transition:all .18s;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;}
-.choice:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
+.choices-wrap{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.choice{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 10px;font-family:'Fredoka One',cursive;font-size:22px;color:var(--white);cursor:pointer;transition:all .18s;text-align:center;display:flex;align-items:center;justify-content:center;gap:7px;min-height:60px;}
+.choice:active{transform:scale(.95);}
 .choice.correct{background:linear-gradient(135deg,rgba(107,203,119,.3),rgba(107,203,119,.15));border-color:var(--green);color:var(--green);animation:wiggle .4s ease;}
 .choice.wrong{background:linear-gradient(135deg,rgba(255,107,107,.3),rgba(255,107,107,.15));border-color:var(--coral);color:var(--coral);animation:shake .4s ease;}
 @keyframes wiggle{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
-/* BUDDY SAYS */
-.buddy-says{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:18px;padding:14px 18px;font-size:14px;font-weight:700;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:14px;position:relative;text-align:center;}
-.buddy-says::before{content:'💬';font-size:16px;margin-right:6px;}
+.buddy-says{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:12px 16px;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:12px;position:relative;text-align:center;}
+.buddy-says::before{content:'💬';font-size:15px;margin-right:5px;}
 
-/* CHAT MESSAGES */
-.chat-wrap{display:flex;flex-direction:column;gap:12px;}
-.mr{display:flex;gap:10px;align-items:flex-end;animation:mf .28s ease;}
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;gap:10px;}
+.mr{display:flex;gap:8px;align-items:flex-end;animation:mf .28s ease;}
 .mr.u{flex-direction:row-reverse;}
 @keyframes mf{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
-.mav{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;background:rgba(15,30,56,.8);}
+.mav{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;background:rgba(15,30,56,.8);}
 .mav.u{background:rgba(255,217,61,.15);}
-.bub{max-width:440px;padding:11px 15px;border-radius:14px;font-size:13.5px;line-height:1.6;font-weight:600;}
-.bub.b{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.1);border-radius:4px 14px 14px 14px;}
-.bub.u{background:linear-gradient(135deg,rgba(255,217,61,.2),rgba(255,107,107,.12));border:1.5px solid rgba(255,217,61,.25);border-radius:14px 4px 14px 14px;}
-.mt{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px;}
+.bub{max-width:400px;padding:10px 14px;border-radius:13px;font-size:13px;line-height:1.6;font-weight:600;}
+.bub.b{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.1);border-radius:4px 13px 13px 13px;}
+.bub.u{background:linear-gradient(135deg,rgba(255,217,61,.2),rgba(255,107,107,.12));border:1.5px solid rgba(255,217,61,.25);border-radius:13px 4px 13px 13px;}
+.mt{font-size:9px;color:rgba(255,255,255,.35);margin-top:2px;}
 .mw{display:flex;flex-direction:column;}
 .mw.u{align-items:flex-end;}
-.dl-wrap{display:flex;gap:4px;align-items:center;height:18px;}
+.dl-wrap{display:flex;gap:4px;align-items:center;height:16px;}
 .dl{width:6px;height:6px;border-radius:50%;background:var(--sun);animation:dlb 1.1s infinite;opacity:.7;}
 .dl:nth-child(2){animation-delay:.18s}.dl:nth-child(3){animation-delay:.36s}
 @keyframes dlb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 
 /* ACTION BTNS */
-.action-row{display:flex;gap:10px;margin-bottom:14px;}
-.abtn{flex:1;padding:13px;border-radius:14px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:15px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.action-row{display:flex;gap:8px;margin-bottom:12px;}
+.abtn{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;font-size:14px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;}
 .abtn.hear{background:linear-gradient(135deg,var(--blue),#2980b9);color:white;box-shadow:0 4px 14px rgba(110,198,245,.3);}
 .abtn.next{background:linear-gradient(135deg,var(--sun),var(--coral));color:white;box-shadow:0 4px 14px rgba(255,217,61,.3);}
 .abtn.next:disabled{opacity:.4;cursor:not-allowed;}
-.abtn:hover:not(:disabled){transform:translateY(-2px);}
+.abtn:active:not(:disabled){transform:scale(.96);}
 
 /* PROGRESS */
-.prog-bar-bg{background:rgba(255,255,255,.08);border-radius:50px;height:8px;margin-bottom:12px;overflow:hidden;}
+.prog-bar-bg{background:rgba(255,255,255,.08);border-radius:50px;height:6px;margin-bottom:12px;overflow:hidden;}
 .prog-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--sun),var(--coral));transition:width .5s ease;}
 
-/* LIVE TRANSCRIPT */
-.live-t{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(15,24,41,.97);border:1.5px solid rgba(255,217,61,.3);border-radius:14px;padding:10px 20px;font-size:13px;color:var(--white);max-width:420px;text-align:center;display:none;z-index:100;backdrop-filter:blur(10px);font-weight:700;}
-.live-t.show{display:block;}
-.lt-lbl{font-size:10px;color:var(--sun);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
-
 /* INPUT */
-.inp-zone{padding:10px 24px 16px;border-top:1px solid var(--border);background:rgba(10,18,40,.85);}
-.ibox{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:13px;padding:8px 13px;}
+.inp-zone{padding:8px 14px 12px;border-top:1px solid var(--border);background:rgba(10,18,40,.85);flex-shrink:0;}
+.ibox{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:7px 11px;}
 .ibox:focus-within{border-color:rgba(255,217,61,.35);}
-#ci{flex:1;background:transparent;border:none;outline:none;color:var(--white);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;}
+#ci{flex:1;background:transparent;border:none;outline:none;color:var(--white);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;min-width:0;}
 #ci::placeholder{color:rgba(255,255,255,.3);}
-.sndb{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--sun),var(--coral));border:none;color:var(--sky3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sndb{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--sun),var(--coral));border:none;color:var(--sky3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
-@media(max-width:800px){
-  #app{grid-template-columns:1fr;grid-template-rows:260px 1fr;}
-  #left{flex-direction:row;align-items:center;padding:10px 12px;gap:8px;height:260px;}
-  .ptop,.alpha-bar-label,.alpha-bar,.mode-tabs,.stars-row{display:none;}
-  .stage{flex:none;width:140px;padding:0;}
-  #buddyCanvas{width:130px!important;height:170px!important;}
-  #right{height:calc(100vh - 260px);}
-  #lesson-panel{padding:14px 16px;}
-  .topbar{padding:10px 16px;}
+/* LIVE TRANSCRIPT */
+.live-t{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(15,24,41,.97);border:1.5px solid rgba(255,217,61,.3);border-radius:12px;padding:8px 18px;font-size:12px;color:var(--white);max-width:90vw;text-align:center;display:none;z-index:100;backdrop-filter:blur(10px);font-weight:700;}
+.live-t.show{display:block;}
+.lt-lbl{font-size:9px;color:var(--sun);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+
+/* ── BOTTOM NAV (mobile) ── */
+#bottomNav{display:none;padding:0;background:rgba(10,18,40,.97);border-top:1px solid var(--border);flex-shrink:0;}
+.bnav-tabs{display:flex;}
+.btab{flex:1;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:'Nunito',sans-serif;font-size:9px;font-weight:700;transition:all .18s;-webkit-tap-highlight-color:transparent;}
+.btab.active{color:var(--sun);}
+.btab .bti{font-size:18px;line-height:1;}
+
+/* ── MOBILE BUDDY BAR ── */
+#mobileBuddy{display:none;flex-shrink:0;background:rgba(15,30,56,.97);border-bottom:1px solid var(--border);padding:6px 14px;align-items:center;gap:10px;}
+.mb-canvas-wrap{flex-shrink:0;}
+#mobileBuddyCanvas{display:block;width:72px!important;height:72px!important;}
+.mb-info{flex:1;min-width:0;}
+.mb-status{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.mb-srow{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--sun);font-weight:700;}
+.mb-sdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:sdp 1.5s infinite;flex-shrink:0;}
+.mb-sdot.sp{background:var(--sun);animation:sdp .35s infinite;}
+.mb-sdot.th{background:var(--blue);animation:sdp .7s infinite;}
+.mb-sdot.li{background:var(--coral);animation:sdp .3s infinite;}
+.mb-viz{display:flex;gap:2px;align-items:center;height:18px;opacity:0;transition:opacity .3s;}
+.mb-viz.on{opacity:1;}
+.mb-vb{width:3px;border-radius:2px;background:linear-gradient(to top,var(--sun),#fff59d);animation:vba .5s ease infinite;}
+.mb-vb:nth-child(1){height:5px}.mb-vb:nth-child(2){height:10px;animation-delay:.05s}.mb-vb:nth-child(3){height:15px;animation-delay:.1s}
+.mb-vb:nth-child(4){height:18px;animation-delay:.15s}.mb-vb:nth-child(5){height:15px;animation-delay:.2s}
+.mb-vb:nth-child(6){height:10px;animation-delay:.25s}.mb-vb:nth-child(7){height:5px;animation-delay:.3s}
+.mb-uviz{display:flex;gap:2px;align-items:center;height:18px;opacity:0;transition:opacity .3s;}
+.mb-uviz.on{opacity:1;}
+.mb-uvb{width:3px;border-radius:2px;background:linear-gradient(to top,var(--coral),#ffb3b3);animation:vba .3s ease infinite;}
+.mb-uvb:nth-child(1){height:6px}.mb-uvb:nth-child(2){height:13px;animation-delay:.04s}.mb-uvb:nth-child(3){height:18px;animation-delay:.08s}
+.mb-uvb:nth-child(4){height:22px;animation-delay:.12s}.mb-uvb:nth-child(5){height:18px;animation-delay:.16s}
+.mb-uvb:nth-child(6){height:13px;animation-delay:.2s}.mb-uvb:nth-child(7){height:6px;animation-delay:.24s}
+.mb-right{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
+#mobileMicBtn{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(135deg,var(--sun),var(--coral));box-shadow:0 4px 16px rgba(255,107,107,.35);position:relative;transition:all .2s;}
+#mobileMicBtn.on{background:linear-gradient(135deg,var(--coral),#b91c1c);animation:mpulse .7s infinite;}
+#mobileMicBtn.speaking{background:linear-gradient(135deg,var(--blue),#1d4ed8);}
+.mb-mlbl{font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-align:center;}
+
+/* ALPHA SCROLL (mobile bottom) */
+#mobileAlphaWrap{display:none;background:rgba(10,18,40,.95);border-bottom:1px solid var(--border);padding:6px 10px 8px;flex-shrink:0;}
+.m-alpha-bar{display:flex;overflow-x:auto;gap:5px;scrollbar-width:none;}
+.m-alpha-bar::-webkit-scrollbar{display:none;}
+.mab{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:15px;color:rgba(255,255,255,.7);cursor:pointer;flex-shrink:0;transition:all .18s;}
+.mab.active{background:linear-gradient(135deg,var(--sun),var(--coral));border-color:transparent;color:var(--sky3);}
+
+/* MODAL */
+#micModal{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:#0f1e38;border:2px solid rgba(255,217,61,0.3);border-radius:22px;padding:28px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6);}
+.modal-allow{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#FFD93D,#FF6B6B);color:#0a1228;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;margin-bottom:9px;}
+.modal-skip{width:100%;padding:9px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;}
+
+/* ═══════════════════
+   DESKTOP LAYOUT
+═══════════════════ */
+@media(min-width:701px){
+  #left{display:flex;}
+  #bottomNav,#mobileBuddy,#mobileAlphaWrap{display:none!important;}
+}
+
+/* ═══════════════════
+   MOBILE LAYOUT
+═══════════════════ */
+@media(max-width:700px){
+  #left{display:none;}
+  #mobileBuddy{display:flex;}
+  #mobileAlphaWrap{display:block;}
+  #bottomNav{display:block;}
+  .live-t{bottom:130px;}
+  #lesson-panel{padding:12px;}
+  .big-letter{font-size:64px;}
+  .letter-emoji{font-size:38px;}
+  .letter-word{font-size:18px;}
+  .choice{font-size:19px;padding:12px 8px;}
 }
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="left">
-    <div class="ptop">
+  <!-- TOP NAV -->
+  <div class="topnav">
+    <div class="logo-row">
       <div class="logo">🐻</div>
-      <div><div class="appname">Buddy Learns</div><div class="appsub">AI Tutor</div></div>
+      <div><div class="appname">Buddy Learns</div><div class="appsub" id="appSubLabel">AI Tutor</div></div>
     </div>
-    <div class="stage">
-      <canvas id="buddyCanvas" width="320" height="280"></canvas>
-      <div class="srow"><span class="sdot" id="sdot"></span><span id="slbl">Ready!</span></div>
-      <div class="viz" id="viz"><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div></div>
-      <div class="uviz" id="uviz"><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div></div>
-      <div class="mic-wrap">
-        <button id="micBtn" onclick="toggleListen()">
-          <div class="mring"></div><div class="mring mring2"></div>
-          <span id="micIcon">🎙️</span>
-        </button>
-        <div class="mlbl" id="mlbl">Tap to speak!</div>
+    <div class="nav-right">
+      <div class="lang-wrap">
+        <button class="langbtn active" onclick="setLang('en')" id="lbtn-en">EN</button>
+        <button class="langbtn" onclick="setLang('hi')" id="lbtn-hi">हि</button>
+        <button class="langbtn" onclick="setLang('zh')" id="lbtn-zh">中</button>
       </div>
+      <div class="star-pill">⭐ <span id="starCount">0</span></div>
     </div>
-    <div class="stars-row">
-      <div class="star-badge">⭐ <span id="starCount">0</span> Stars</div>
-      <div class="star-badge">📚 <span id="lessonCount">0</span> Learned</div>
-    </div>
-    <div class="mode-tabs">
-      <button class="mtab active" id="tab-learn" onclick="setMode('learn')">📚 Learn</button>
-      <button class="mtab" id="tab-quiz" onclick="setMode('quiz')">🎯 Quiz</button>
-      <button class="mtab" id="tab-chat" onclick="setMode('chat')">💬 Chat</button>
-    </div>
-    <div class="alpha-bar-label">A to Z</div>
-    <div class="alpha-bar" id="alphaBar"></div>
   </div>
 
-  <div id="right">
-    <div class="topbar">
-      <div><div class="tbt" id="topTitle">🔤 Learning Alphabets</div><div class="tbs" id="topSub">Tap a letter or speak to Buddy!</div></div>
-      <div class="tbbtns">
-        <button class="tbb" onclick="prevLetter()">←</button>
-        <button class="tbb" onclick="nextLetter()">→</button>
-        <button class="tbb" onclick="clearChat()">🗑️</button>
+  <!-- MOBILE BUDDY BAR -->
+  <div id="mobileBuddy">
+    <div class="mb-canvas-wrap">
+      <canvas id="mobileBuddyCanvas" width="120" height="120"></canvas>
+    </div>
+    <div class="mb-info">
+      <div class="mb-status">
+        <div class="mb-srow"><span class="mb-sdot" id="mbsdot"></span><span id="mbslbl">Ready!</span></div>
+        <div class="mb-viz" id="mbviz"><div class="mb-vb"></div><div class="mb-vb"></div><div class="mb-vb"></div><div class="mb-vb"></div><div class="mb-vb"></div><div class="mb-vb"></div><div class="mb-vb"></div></div>
+        <div class="mb-uviz" id="mbuviz"><div class="mb-uvb"></div><div class="mb-uvb"></div><div class="mb-uvb"></div><div class="mb-uvb"></div><div class="mb-uvb"></div><div class="mb-uvb"></div><div class="mb-uvb"></div></div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;line-height:1.4;" id="buddyQuickMsg">Hello! Let's learn!</div>
+    </div>
+    <div class="mb-right">
+      <button id="mobileMicBtn" onclick="toggleListen()">
+        <span id="mobileMicIcon">🎙️</span>
+      </button>
+      <div class="mb-mlbl" id="mbmlbl">Speak!</div>
+    </div>
+  </div>
+
+  <!-- MOBILE ALPHA SCROLL -->
+  <div id="mobileAlphaWrap">
+    <div class="m-alpha-bar" id="mobileAlphaBar"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <!-- DESKTOP LEFT -->
+    <div id="left">
+      <div class="stage">
+        <canvas id="buddyCanvas" width="240" height="220"></canvas>
+        <div class="srow"><span class="sdot" id="sdot"></span><span id="slbl">Ready!</span></div>
+        <div class="viz" id="viz"><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div><div class="vb"></div></div>
+        <div class="uviz" id="uviz"><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div><div class="uvb"></div></div>
+        <div class="mic-wrap">
+          <button id="micBtn" onclick="toggleListen()">
+            <div class="mring"></div><div class="mring mring2"></div>
+            <span id="micIcon">🎙️</span>
+          </button>
+          <div class="mlbl" id="mlbl">Tap to speak!</div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-pill">⭐<span id="starCount2">0</span></div>
+        <div class="stat-pill">📚<span id="lessonCount">0</span></div>
+      </div>
+      <div class="mode-tabs">
+        <button class="mtab active" id="tab-learn" onclick="setMode('learn')">📚</button>
+        <button class="mtab" id="tab-quiz" onclick="setMode('quiz')">🎯</button>
+        <button class="mtab" id="tab-chat" onclick="setMode('chat')">💬</button>
+      </div>
+      <div class="alpha-wrap">
+        <div class="alpha-bar-label">A — Z</div>
+        <div class="alpha-bar" id="alphaBar"></div>
       </div>
     </div>
-    <div id="lesson-panel"></div>
-    <div class="inp-zone">
-      <div class="ibox">
-        <input id="ci" type="text" placeholder="Ask Buddy anything…" maxlength="100">
-        <button class="sndb" onclick="sendText()">➤</button>
+
+    <!-- RIGHT PANEL -->
+    <div id="right">
+      <div class="rbar">
+        <div><div class="rbt" id="topTitle" style="font-family:'Fredoka One',cursive;font-size:16px;color:#fff;">🔤 Learning Alphabets</div><div class="rbar-s" id="topSub">Tap a letter or speak to Buddy!</div></div>
+        <div class="rbar-btns">
+          <button class="rbb" onclick="prevLetter()">←</button>
+          <button class="rbb" onclick="nextLetter()">→</button>
+          <button class="rbb" onclick="clearPanel()">🗑️</button>
+        </div>
       </div>
+      <div id="lesson-panel"></div>
+      <div class="inp-zone">
+        <div class="ibox">
+          <input id="ci" type="text" placeholder="Ask Buddy anything…" maxlength="100" autocomplete="off">
+          <button class="sndb" onclick="sendText()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div id="bottomNav">
+    <div class="bnav-tabs">
+      <button class="btab active" id="btab-learn" onclick="setMode('learn')"><div class="bti">📚</div><span id="blearn-lbl">Learn</span></button>
+      <button class="btab" id="btab-quiz" onclick="setMode('quiz')"><div class="bti">🎯</div><span id="bquiz-lbl">Quiz</span></button>
+      <button class="btab" id="btab-chat" onclick="setMode('chat')"><div class="bti">💬</div><span id="bchat-lbl">Chat</span></button>
     </div>
   </div>
 </div>
 
-<!-- MIC PERMISSION MODAL -->
-<div id="micModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#0f1e38;border:2px solid rgba(255,217,61,0.3);border-radius:24px;padding:32px 28px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6);">
-    <div style="font-size:56px;margin-bottom:12px;">🎙️</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:8px;">Buddy needs your mic!</div>
-    <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:24px;">So Buddy can hear you answer questions and talk back! Chrome will ask — just click <strong style="color:#FFD93D">Allow</strong>.</div>
-    <button id="modalAllowBtn" style="width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#FFD93D,#FF6B6B);color:#0a1228;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;margin-bottom:10px;">
-      ✅ Allow Microphone
-    </button>
-    <button id="modalSkipBtn" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">
-      Skip — I'll type instead
-    </button>
-    <div id="micModalStatus" style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.4);min-height:16px;"></div>
+<!-- MIC MODAL -->
+<div id="micModal">
+  <div class="modal-box">
+    <div style="font-size:50px;margin-bottom:10px;">🎙️</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#fff;margin-bottom:8px;">Buddy needs your mic!</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:22px;">So Buddy can hear you! Tap <strong style="color:#FFD93D">Allow</strong>.</div>
+    <button id="modalAllowBtn" class="modal-allow">✅ Allow Microphone</button>
+    <button id="modalSkipBtn" class="modal-skip">Skip — I'll type instead</button>
+    <div id="micModalStatus" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.4);min-height:14px;"></div>
   </div>
 </div>
 
 <div class="live-t" id="liveT"><div class="lt-lbl">You said</div><div id="ltText">…</div></div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  TEDDY BEAR CANVAS ANIMATION ENGINE
-//  Cute round teddy bear — kid-friendly & huggable!
-// ═══════════════════════════════════════════════════
-const cv=document.getElementById('buddyCanvas'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+// ═══════════════════════════════════════════════
+// LANGUAGE SYSTEM
+// ═══════════════════════════════════════════════
+let currentLang = 'en';
+
+const LANG = {
+  en: {
+    appSub: 'AI Tutor',
+    ready: 'Ready!',
+    thinking: 'Thinking…',
+    speaking: 'Buddy is talking!',
+    listening: 'Listening…',
+    excited: 'Yay!',
+    greeting: 'Hello!',
+    tapSpeak: 'Tap to speak!',
+    listeningStop: 'Listening! Tap to stop',
+    buddyTalking: 'Buddy is talking!',
+    learnTab: 'Learn',
+    quizTab: 'Quiz',
+    chatTab: 'Chat',
+    youSaid: 'You said',
+    phonicsSounds: '🔤 Phonics Sounds',
+    hearIt: '🔊 Hear it!',
+    nextLetter: 'Next Letter ➜',
+    nextBtn: 'Next ➜',
+    whichLetter: 'Which letter makes these sounds? Tap the right letter! 🎯',
+    chatGreet: `Hi there! 👋 I'm Buddy your teddy bear tutor! 🐻 Ask me about any letter, phonics sound, or just say hello!`,
+    addAPIKey: '💡 Add your Anthropic API key to enable AI chat! For now: ',
+    hearSound: '🔊 Hear',
+    speak: 'Speak!',
+    learningLabel: (l) => `📖 Learning "${l}"`,
+    isForLabel: (l, w) => `${l} is for ${w}!`,
+    quizTitle: '🎯 Quiz Time!',
+    quizSub: 'Which letter makes this sound?',
+    chatTitle: '💬 Chat with Buddy',
+    chatSub: 'Ask Buddy anything about letters!',
+    buddyIntro: (l) => `Hi! I'm Buddy! Today we learn the letter ${l}! Tap any sound card to hear it! 🐻`,
+    correct2Stars: (c) => `Amazing! ${c} is correct! You got 2 stars! Well done!`,
+    wrongAnswer: (c, w) => `Almost! The letter is ${c}. ${c} is for ${w}. You will get it next time!`,
+    speakTeach: (l, w, sounds) => `${l}! ${l} is for ${w}! ${sounds}. Can you say ${l}?`,
+    speakHear: (l, w, sounds) => `${l}! ${l} for ${w}! Sounds: ${sounds}`,
+    speakQuiz: (w) => `Which letter is this? ${w} starts with which letter? Find it!`,
+    speakCorrect: (c, w) => `Yes! Amazing! ${c}! ${c} is for ${w}! You earned 2 stars!`,
+    speakWrong: (c, w) => `Oops! The answer is ${c}. ${c} is for ${w}. Keep trying!`,
+    speakGreet: (l, w) => `Hello! I'm Buddy your teddy bear teacher! Let's learn the alphabet together! Today we start with the letter ${l}! ${l} is for ${w}! Tap any sound card to hear the phonics! Tap the mic to speak!`,
+    speakPhonics: (label, sym, speak) => `${label}! ${sym}. ${speak}. Can you say it?`,
+    voiceLang: 'en-US',
+    transPill: null,
+  },
+  hi: {
+    appSub: 'AI शिक्षक',
+    ready: 'तैयार!',
+    thinking: 'सोच रहा हूँ…',
+    speaking: 'बडी बोल रहा है!',
+    listening: 'सुन रहा हूँ…',
+    excited: 'वाह!',
+    greeting: 'नमस्ते!',
+    tapSpeak: 'बोलने के लिए टैप करें!',
+    listeningStop: 'सुन रहा हूँ! रोकने के लिए टैप करें',
+    buddyTalking: 'बडी बोल रहा है!',
+    learnTab: 'सीखें',
+    quizTab: 'क्विज़',
+    chatTab: 'बात',
+    youSaid: 'आपने कहा',
+    phonicsSounds: '🔤 ध्वनि सीखें',
+    hearIt: '🔊 सुनो!',
+    nextLetter: 'अगला अक्षर ➜',
+    nextBtn: 'अगला ➜',
+    whichLetter: 'इन आवाज़ों में कौन सा अक्षर है? सही अक्षर पर टैप करो! 🎯',
+    chatGreet: `नमस्ते! 👋 मैं बडी हूँ, तुम्हारा टेडी बियर शिक्षक! 🐻 किसी भी अक्षर या ध्वनि के बारे में पूछो!`,
+    addAPIKey: '💡 AI चैट के लिए API key डालें! अभी के लिए: ',
+    hearSound: '🔊 सुनो',
+    speak: 'बोलो!',
+    learningLabel: (l) => `📖 "${l}" सीख रहे हैं`,
+    isForLabel: (l, w) => `${l} से ${w} बनता है!`,
+    quizTitle: '🎯 क्विज़ समय!',
+    quizSub: 'कौन सा अक्षर यह आवाज़ बनाता है?',
+    chatTitle: '💬 बडी से बात करो',
+    chatSub: 'अक्षरों के बारे में बडी से कुछ भी पूछो!',
+    buddyIntro: (l) => `नमस्ते! मैं बडी हूँ! आज हम ${l} अक्षर सीखेंगे! किसी भी कार्ड पर टैप करो! 🐻`,
+    correct2Stars: (c) => `शाबाश! ${c} सही है! तुम्हें 2 सितारे मिले! बहुत अच्छे!`,
+    wrongAnswer: (c, w) => `लगभग सही! अक्षर ${c} है। ${c} से ${w} बनता है। अगली बार जरूर मिलेगा!`,
+    speakTeach: (l, w, sounds) => `${l}! ${l} से ${w} बनता है! ${sounds}. क्या तुम ${l} कह सकते हो?`,
+    speakHear: (l, w, sounds) => `${l}! ${l} से ${w}! आवाज़ें: ${sounds}`,
+    speakQuiz: (w) => `यह कौन सा अक्षर है? ${w} किस अक्षर से शुरू होता है? ढूंढो!`,
+    speakCorrect: (c, w) => `हाँ! शाबाश! ${c}! ${c} से ${w} बनता है! तुम्हें 2 सितारे मिले!`,
+    speakWrong: (c, w) => `अरे! जवाब ${c} है। ${c} से ${w} बनता है। कोशिश करते रहो!`,
+    speakGreet: (l, w) => `नमस्ते! मैं बडी हूँ, तुम्हारा टेडी बियर शिक्षक! आज हम ${l} से शुरू करेंगे! ${l} से ${w} बनता है! किसी भी कार्ड पर टैप करो! माइक पर टैप करके बोलो!`,
+    speakPhonics: (label, sym, speak) => `${label}! ${sym}. ${speak}. क्या तुम यह कह सकते हो?`,
+    voiceLang: 'hi-IN',
+    transPill: { label: 'हिंदी', key: 'hi' },
+  },
+  zh: {
+    appSub: 'AI 导师',
+    ready: '准备好了！',
+    thinking: '想一想…',
+    speaking: '巴迪在说话！',
+    listening: '正在听…',
+    excited: '太棒了！',
+    greeting: '你好！',
+    tapSpeak: '点击说话！',
+    listeningStop: '正在听！点击停止',
+    buddyTalking: '巴迪在说话！',
+    learnTab: '学习',
+    quizTab: '测验',
+    chatTab: '聊天',
+    youSaid: '你说了',
+    phonicsSounds: '🔤 自然拼读',
+    hearIt: '🔊 听一听！',
+    nextLetter: '下一个字母 ➜',
+    nextBtn: '下一个 ➜',
+    whichLetter: '哪个字母发这些音？点击正确的字母！🎯',
+    chatGreet: `你好！👋 我是巴迪，你的泰迪熊老师！🐻 问我任何关于字母或发音的问题吧！`,
+    addAPIKey: '💡 添加 API 密钥以启用 AI 聊天！现在: ',
+    hearSound: '🔊 听一听',
+    speak: '说话！',
+    learningLabel: (l) => `📖 学习字母 "${l}"`,
+    isForLabel: (l, w) => `${l} 代表 ${w}！`,
+    quizTitle: '🎯 小测验！',
+    quizSub: '哪个字母发出这个音？',
+    chatTitle: '💬 和巴迪聊天',
+    chatSub: '问巴迪任何关于字母的问题！',
+    buddyIntro: (l) => `你好！我是巴迪！今天我们来学字母 ${l}！点击任意卡片听发音！🐻`,
+    correct2Stars: (c) => `太棒了！${c} 答对了！你得到了 2 颗星！非常好！`,
+    wrongAnswer: (c, w) => `差一点！正确字母是 ${c}。${c} 代表 ${w}。下次加油！`,
+    speakTeach: (l, w, sounds) => `${l}！${l} 代表 ${w}！${sounds}。你能说 ${l} 吗？`,
+    speakHear: (l, w, sounds) => `${l}！${l} 代表 ${w}！发音：${sounds}`,
+    speakQuiz: (w) => `这是哪个字母？${w} 以哪个字母开头？找一找！`,
+    speakCorrect: (c, w) => `对了！太棒了！${c}！${c} 代表 ${w}！你得到了 2 颗星！`,
+    speakWrong: (c, w) => `哎呀！答案是 ${c}。${c} 代表 ${w}。继续加油！`,
+    speakGreet: (l, w) => `你好！我是巴迪，你的泰迪熊老师！今天我们从字母 ${l} 开始！${l} 代表 ${w}！点击任意卡片听自然拼读！点击麦克风说话！`,
+    speakPhonics: (label, sym, speak) => `${label}！${sym}。${speak}。你能说出来吗？`,
+    voiceLang: 'zh-CN',
+    transPill: { label: '中文', key: 'zh' },
+  }
+};
+
+// ═══════════════════════════════════════════════
+// TRANSLATIONS PER LETTER (word in Hindi & Chinese)
+// ═══════════════════════════════════════════════
+const LETTER_TRANS = {
+  A: { hi: 'सेब (Apple)', zh: '苹果 (Píngguǒ)' },
+  B: { hi: 'गेंद (Ball)', zh: '球 (Qiú)' },
+  C: { hi: 'बिल्ली (Cat)', zh: '猫 (Māo)' },
+  D: { hi: 'कुत्ता (Dog)', zh: '狗 (Gǒu)' },
+  E: { hi: 'हाथी (Elephant)', zh: '大象 (Dàxiàng)' },
+  F: { hi: 'मछली (Fish)', zh: '鱼 (Yú)' },
+  G: { hi: 'अंगूर (Grapes)', zh: '葡萄 (Pútáo)' },
+  H: { hi: 'टोपी (Hat)', zh: '帽子 (Màozi)' },
+  I: { hi: 'आइसक्रीम', zh: '冰淇淋 (Bīngqílín)' },
+  J: { hi: 'जेलिफ़िश', zh: '水母 (Shuǐmǔ)' },
+  K: { hi: 'पतंग (Kite)', zh: '风筝 (Fēngzheng)' },
+  L: { hi: 'शेर (Lion)', zh: '狮子 (Shīzi)' },
+  M: { hi: 'चाँद (Moon)', zh: '月亮 (Yuèliang)' },
+  N: { hi: 'घोंसला (Nest)', zh: '鸟巢 (Niǎocháo)' },
+  O: { hi: 'संतरा (Orange)', zh: '橙子 (Chéngzi)' },
+  P: { hi: 'पेंगुइन', zh: '企鹅 (Qǐ\'é)' },
+  Q: { hi: 'रानी (Queen)', zh: '女王 (Nǚwáng)' },
+  R: { hi: 'इंद्रधनुष', zh: '彩虹 (Cǎihóng)' },
+  S: { hi: 'सूरज (Sun)', zh: '太阳 (Tàiyáng)' },
+  T: { hi: 'बाघ (Tiger)', zh: '老虎 (Lǎohǔ)' },
+  U: { hi: 'छाता (Umbrella)', zh: '雨伞 (Yǔsǎn)' },
+  V: { hi: 'ज्वालामुखी', zh: '火山 (Huǒshān)' },
+  W: { hi: 'व्हेल (Whale)', zh: '鲸鱼 (Jīngyú)' },
+  X: { hi: 'ज़ाइलोफ़ोन', zh: '木琴 (Mùqín)' },
+  Y: { hi: 'नौका (Yacht)', zh: '游艇 (Yóutǐng)' },
+  Z: { hi: 'ज़ेब्रा (Zebra)', zh: '斑马 (Bānmǎ)' },
+};
+
+function t(key, ...args) {
+  const L = LANG[currentLang];
+  const val = L[key];
+  if (typeof val === 'function') return val(...args);
+  return val || LANG.en[key] || key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  ['en','hi','zh'].forEach(l => {
+    document.getElementById('lbtn-'+l)?.classList.toggle('active', l===lang);
+  });
+  document.getElementById('appSubLabel').textContent = t('appSub');
+  updateStateLabels(A.state);
+  document.getElementById('mlbl').textContent = t('tapSpeak');
+  document.getElementById('mbmlbl').textContent = t('speak');
+  document.getElementById('ci').placeholder = currentLang==='hi' ? 'बडी से कुछ भी पूछें…' : currentLang==='zh' ? '问巴迪任何问题…' : 'Ask Buddy anything…';
+  if (mode === 'learn') showLearnPanel();
+  else if (mode === 'quiz') showQuizPanel();
+  else showChatPanel();
+}
+
+// ═══════════════════════════════════════════════
+// BEAR CANVAS
+// ═══════════════════════════════════════════════
+const cv = document.getElementById('buddyCanvas');
+const ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+
+// Mobile canvas
+const mcv = document.getElementById('mobileBuddyCanvas');
+const mctx = mcv.getContext('2d');
+const MW = mcv.width, MH = mcv.height;
+
 const A={t:0,stT:0,state:'idle',breathY:0,headTilt:0,blinkT:0,blinkNext:150,pupX:0,pupY:0,browR:0,mOpen:0,mShape:0,phonIdx:0,phonTimer:0,waveT:0,waving:0,bounce:0,excite:0};
 const PHON=[[0,0],[.4,1],[.75,2],[.55,1],[.1,0],[.7,2],[.45,1],[.05,0],[.85,2],[.55,1],[.2,0],[.65,2]];
-const lerp=(a,b,t)=>a+(b-a)*t;
+const lerp=(a,b,t2)=>a+(b-a)*t2;
 
-function drawBG(){
-  const g=ctx.createRadialGradient(W/2,H*.7,10,W/2,H*.4,W);
+function drawBG(c,w,h){
+  const g=c.createRadialGradient(w/2,h*.7,10,w/2,h*.4,w);
   g.addColorStop(0,'#0f1e38');g.addColorStop(1,'#0a1228');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  // Stars
-  ctx.fillStyle='rgba(255,255,255,0.4)';
-  [[30,20],[80,35],[260,18],[300,40],[180,15],[50,60]].forEach(([x,y])=>{
-    ctx.beginPath();ctx.arc(x,y,1+Math.sin(A.t+x)*.5,0,Math.PI*2);ctx.fill();
+  c.fillStyle=g;c.fillRect(0,0,w,h);
+  c.fillStyle='rgba(255,255,255,0.4)';
+  [[w*.1,h*.08],[w*.3,h*.13],[w*.8,h*.07],[w*.9,h*.15],[w*.55,h*.05]].forEach(([x,y])=>{
+    c.beginPath();c.arc(x,y,1+Math.sin(A.t+x)*.5,0,Math.PI*2);c.fill();
   });
-  // Warm ground glow
-  const gg=ctx.createRadialGradient(W/2,H,5,W/2,H*.7,W*.6);
-  gg.addColorStop(0,'rgba(198,134,66,0.08)');gg.addColorStop(1,'transparent');
-  ctx.fillStyle=gg;ctx.fillRect(0,0,W,H);
 }
 
-function roundRect(x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath();
-}
-
-function drawTeddy(cx2,cy2){
-  const by=cy2+A.breathY+A.bounce;
+function drawTeddy(c,cx2,cy2,scale){
+  const s=scale||1;
+  c.save();
+  c.translate(cx2,cy2);
+  c.scale(s,s);
+  const bx=0, by=A.breathY+A.bounce;
 
   // Shadow
-  ctx.fillStyle='rgba(0,0,0,0.25)';
-  ctx.beginPath();ctx.ellipse(cx2,by+72,42,9,0,0,Math.PI*2);ctx.fill();
+  c.fillStyle='rgba(0,0,0,0.22)';
+  c.beginPath();c.ellipse(bx,by+72,38,8,0,0,Math.PI*2);c.fill();
 
-  // === FEET / LEGS ===
-  // Left foot
-  const fg=ctx.createRadialGradient(cx2-18,by+65,2,cx2-18,by+62,18);
+  // Feet
+  const fg=c.createRadialGradient(bx-18,by+65,2,bx-18,by+62,18);
   fg.addColorStop(0,'#e8a96a');fg.addColorStop(1,'#c68642');
-  ctx.fillStyle=fg;
-  ctx.beginPath();ctx.ellipse(cx2-18,by+66,16,10,-.15,0,Math.PI*2);ctx.fill();
-  // Paw pads on left foot
-  ctx.fillStyle='rgba(139,94,60,0.5)';
-  ctx.beginPath();ctx.ellipse(cx2-18,by+70,7,4,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(139,94,60,0.4)';
-  [[cx2-24,by+68],[cx2-12,by+68],[cx2-18,by+65]].forEach(([px,py])=>{
-    ctx.beginPath();ctx.ellipse(px,py,2.5,2,0,0,Math.PI*2);ctx.fill();
-  });
+  c.fillStyle=fg;
+  c.beginPath();c.ellipse(bx-18,by+66,14,9,-.15,0,Math.PI*2);c.fill();
+  c.fillStyle='rgba(139,94,60,0.45)';
+  c.beginPath();c.ellipse(bx-18,by+70,6,3.5,0,0,Math.PI*2);c.fill();
+  c.fillStyle=fg;
+  c.beginPath();c.ellipse(bx+18,by+66,14,9,.15,0,Math.PI*2);c.fill();
+  c.fillStyle='rgba(139,94,60,0.45)';
+  c.beginPath();c.ellipse(bx+18,by+70,6,3.5,0,0,Math.PI*2);c.fill();
 
-  // Right foot
-  ctx.fillStyle=fg;
-  ctx.beginPath();ctx.ellipse(cx2+18,by+66,16,10,.15,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(139,94,60,0.5)';
-  ctx.beginPath();ctx.ellipse(cx2+18,by+70,7,4,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(139,94,60,0.4)';
-  [[cx2+12,by+68],[cx2+24,by+68],[cx2+18,by+65]].forEach(([px,py])=>{
-    ctx.beginPath();ctx.ellipse(px,py,2.5,2,0,0,Math.PI*2);ctx.fill();
-  });
-
-  // === BODY ===
-  const bg=ctx.createRadialGradient(cx2-8,by+10,5,cx2,by+15,48);
+  // Body
+  const bg=c.createRadialGradient(bx-8,by+10,5,bx,by+15,44);
   bg.addColorStop(0,'#e8a96a');bg.addColorStop(1,'#c68642');
-  ctx.fillStyle=bg;
-  ctx.beginPath();ctx.ellipse(cx2,by+15,38,46,0,0,Math.PI*2);ctx.fill();
-
-  // Body outline (subtle)
-  ctx.strokeStyle='rgba(139,94,60,0.3)';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.ellipse(cx2,by+15,38,46,0,0,Math.PI*2);ctx.stroke();
-
-  // Belly patch
-  const belly=ctx.createRadialGradient(cx2,by+20,3,cx2,by+20,26);
+  c.fillStyle=bg;
+  c.beginPath();c.ellipse(bx,by+15,34,42,0,0,Math.PI*2);c.fill();
+  const belly=c.createRadialGradient(bx,by+20,3,bx,by+20,22);
   belly.addColorStop(0,'#f5deb3');belly.addColorStop(1,'#e8c88a');
-  ctx.fillStyle=belly;
-  ctx.beginPath();ctx.ellipse(cx2,by+20,22,26,0,0,Math.PI*2);ctx.fill();
+  c.fillStyle=belly;
+  c.beginPath();c.ellipse(bx,by+20,19,23,0,0,Math.PI*2);c.fill();
 
-  // === WAVING ARM (left — waves when excited) ===
-  const wl=A.waving;
-  const wAngle=-Math.PI/3+Math.sin(A.waveT*2.5)*Math.PI/4*wl;
-  ctx.save();
-  ctx.translate(cx2-34,by+5);
-  ctx.rotate(wAngle);
-  const ag=ctx.createRadialGradient(0,0,2,0,8,18);
-  ag.addColorStop(0,'#e8a96a');ag.addColorStop(1,'#c68642');
-  ctx.fillStyle=ag;
-  ctx.beginPath();ctx.ellipse(0,14,11,20,0,0,Math.PI*2);ctx.fill();
-  // Paw on arm
-  ctx.fillStyle='#e8a96a';
-  ctx.beginPath();ctx.ellipse(0,32,10,10,0,0,Math.PI*2);ctx.fill();
-  // Paw pads
-  ctx.fillStyle='rgba(139,94,60,0.4)';
-  ctx.beginPath();ctx.ellipse(0,35,5,4,0,0,Math.PI*2);ctx.fill();
-  [[-5,31],[5,31],[0,28]].forEach(([px,py])=>{
-    ctx.beginPath();ctx.ellipse(px,py,2,1.8,0,0,Math.PI*2);ctx.fill();
-  });
-  ctx.restore();
+  // Waving arm
+  const wAngle=-Math.PI/3+Math.sin(A.waveT*2.5)*Math.PI/4*A.waving;
+  c.save();c.translate(bx-30,by+5);c.rotate(wAngle);
+  c.fillStyle=bg;
+  c.beginPath();c.ellipse(0,12,9,17,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#e8a96a';
+  c.beginPath();c.ellipse(0,27,8.5,8.5,0,0,Math.PI*2);c.fill();
+  c.restore();
 
-  // Right arm (static, slight pose)
-  ctx.save();
-  ctx.translate(cx2+34,by+5);
-  ctx.rotate(Math.PI/6+Math.sin(A.t*.4)*.04);
-  ctx.fillStyle=bg;
-  ctx.beginPath();ctx.ellipse(0,14,11,20,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#e8a96a';
-  ctx.beginPath();ctx.ellipse(0,32,10,10,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(139,94,60,0.4)';
-  ctx.beginPath();ctx.ellipse(0,35,5,4,0,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  // Right arm
+  c.save();c.translate(bx+30,by+5);c.rotate(Math.PI/6+Math.sin(A.t*.4)*.04);
+  c.fillStyle=bg;
+  c.beginPath();c.ellipse(0,12,9,17,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#e8a96a';
+  c.beginPath();c.ellipse(0,27,8.5,8.5,0,0,Math.PI*2);c.fill();
+  c.restore();
 
-  // === HEAD ===
-  ctx.save();
-  ctx.translate(cx2,by);
-  ctx.rotate(A.headTilt);
+  // Head
+  c.save();c.translate(bx,by);c.rotate(A.headTilt);
 
-  // Ears (behind head)
-  const earG=ctx.createRadialGradient(-26,-48,2,-26,-48,14);
+  // Ears
+  const earG=c.createRadialGradient(-24,-47,2,-24,-47,13);
   earG.addColorStop(0,'#e8a96a');earG.addColorStop(1,'#b5763a');
-  ctx.fillStyle=earG;
-  // Left ear
-  ctx.beginPath();ctx.ellipse(-24,-50,14,14,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#e8956a';
-  ctx.beginPath();ctx.ellipse(-24,-50,8,8,0,0,Math.PI*2);ctx.fill();
-  // Right ear
-  ctx.fillStyle=earG;
-  ctx.beginPath();ctx.ellipse(24,-50,14,14,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#e8956a';
-  ctx.beginPath();ctx.ellipse(24,-50,8,8,0,0,Math.PI*2);ctx.fill();
+  c.fillStyle=earG;
+  c.beginPath();c.ellipse(-22,-48,13,13,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#e8956a';
+  c.beginPath();c.ellipse(-22,-48,7,7,0,0,Math.PI*2);c.fill();
+  c.fillStyle=earG;
+  c.beginPath();c.ellipse(22,-48,13,13,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#e8956a';
+  c.beginPath();c.ellipse(22,-48,7,7,0,0,Math.PI*2);c.fill();
 
-  // Head main
-  const hg=ctx.createRadialGradient(-6,-28,4,0,-26,32);
+  // Head
+  const hg=c.createRadialGradient(-5,-26,4,0,-24,28);
   hg.addColorStop(0,'#e8a96a');hg.addColorStop(1,'#c68642');
-  ctx.fillStyle=hg;
-  ctx.beginPath();ctx.ellipse(0,-26,30,30,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='rgba(139,94,60,0.2)';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.ellipse(0,-26,30,30,0,0,Math.PI*2);ctx.stroke();
+  c.fillStyle=hg;
+  c.beginPath();c.ellipse(0,-24,27,27,0,0,Math.PI*2);c.fill();
 
-  // Forehead tuft (little fur tufts)
-  ctx.fillStyle='rgba(232,169,106,0.7)';
-  [[-6,-54],[0,-56],[6,-54]].forEach(([tx,ty])=>{
-    ctx.beginPath();ctx.ellipse(tx,ty,3,5,tx*.03,0,Math.PI*2);ctx.fill();
-  });
-
-  // === EYES ===
+  // Eyes
   const eyeOp=1-A.blinkT;
-  const px=A.pupX*.12,py=A.pupY*.12;
-
-  // Eye bg (white sclera)
-  ctx.fillStyle='rgba(255,255,255,0.95)';
-  ctx.beginPath();ctx.ellipse(-11,-28,9,9*eyeOp,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(11,-28,9,9*eyeOp,0,0,Math.PI*2);ctx.fill();
-
+  const px=A.pupX*.1,py=A.pupY*.1;
+  c.fillStyle='rgba(255,255,255,0.95)';
+  c.beginPath();c.ellipse(-10,-26,8,8*eyeOp,0,0,Math.PI*2);c.fill();
+  c.beginPath();c.ellipse(10,-26,8,8*eyeOp,0,0,Math.PI*2);c.fill();
   if(eyeOp>.1){
-    // Dark pupils
-    ctx.fillStyle='#1a0a00';
-    ctx.beginPath();ctx.ellipse(-11+px,-28+py,5.5,5.5*eyeOp,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(11+px,-28+py,5.5,5.5*eyeOp,0,0,Math.PI*2);ctx.fill();
-    // Shine
-    ctx.fillStyle='rgba(255,255,255,0.9)';
-    ctx.beginPath();ctx.ellipse(-9+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(13+px,-30+py,2,2*eyeOp,0,0,Math.PI*2);ctx.fill();
-    // Tiny extra shine
-    ctx.fillStyle='rgba(255,255,255,0.5)';
-    ctx.beginPath();ctx.ellipse(-12+px,-26+py,1,1*eyeOp,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(12+px,-26+py,1,1*eyeOp,0,0,Math.PI*2);ctx.fill();
+    c.fillStyle='#1a0a00';
+    c.beginPath();c.ellipse(-10+px,-26+py,4.5,4.5*eyeOp,0,0,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(10+px,-26+py,4.5,4.5*eyeOp,0,0,Math.PI*2);c.fill();
+    c.fillStyle='rgba(255,255,255,0.9)';
+    c.beginPath();c.ellipse(-8+px,-28+py,1.7,1.7*eyeOp,0,0,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(12+px,-28+py,1.7,1.7*eyeOp,0,0,Math.PI*2);c.fill();
   }
-
-  // Blink lid
   if(A.blinkT>.05){
-    ctx.fillStyle='#c68642';
-    ctx.beginPath();ctx.ellipse(-11,-28-9*(1-A.blinkT),10,10,0,Math.PI,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(11,-28-9*(1-A.blinkT),10,10,0,Math.PI,Math.PI*2);ctx.fill();
+    c.fillStyle='#c68642';
+    c.beginPath();c.ellipse(-10,-26-8*(1-A.blinkT),9,9,0,Math.PI,Math.PI*2);c.fill();
+    c.beginPath();c.ellipse(10,-26-8*(1-A.blinkT),9,9,0,Math.PI,Math.PI*2);c.fill();
   }
 
-  // Eyebrows (expressive)
-  ctx.strokeStyle='#6b3a1f';ctx.lineWidth=2.5;ctx.lineCap='round';
-  const bl=A.browR*6;
-  ctx.beginPath();ctx.moveTo(-18,-39-bl);ctx.quadraticCurveTo(-11,-42-bl,-4,-39-bl*.6);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(4,-39-bl*.6);ctx.quadraticCurveTo(11,-42-bl,18,-39-bl);ctx.stroke();
+  // Eyebrows
+  c.strokeStyle='#6b3a1f';c.lineWidth=2;c.lineCap='round';
+  const bl=A.browR*5;
+  c.beginPath();c.moveTo(-16,-36-bl);c.quadraticCurveTo(-10,-39-bl,-4,-36-bl*.6);c.stroke();
+  c.beginPath();c.moveTo(4,-36-bl*.6);c.quadraticCurveTo(10,-39-bl,16,-36-bl);c.stroke();
 
-  // Blush cheeks
-  ctx.fillStyle='rgba(255,140,100,0.25)';
-  ctx.beginPath();ctx.ellipse(-18,-20,9,5,-.15,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(18,-20,9,5,.15,0,Math.PI*2);ctx.fill();
+  // Blush
+  c.fillStyle='rgba(255,140,100,0.22)';
+  c.beginPath();c.ellipse(-16,-18,8,4.5,-.15,0,Math.PI*2);c.fill();
+  c.beginPath();c.ellipse(16,-18,8,4.5,.15,0,Math.PI*2);c.fill();
 
-  // === SNOUT ===
-  const snoutG=ctx.createRadialGradient(0,-13,2,0,-14,14);
+  // Snout
+  const snoutG=c.createRadialGradient(0,-11,2,0,-12,12);
   snoutG.addColorStop(0,'#f5e6c8');snoutG.addColorStop(1,'#e8cfa0');
-  ctx.fillStyle=snoutG;
-  ctx.beginPath();ctx.ellipse(0,-13,14,10,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='rgba(139,94,60,0.2)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.ellipse(0,-13,14,10,0,0,Math.PI*2);ctx.stroke();
+  c.fillStyle=snoutG;
+  c.beginPath();c.ellipse(0,-11,12,8.5,0,0,Math.PI*2);c.fill();
 
   // Nose
-  const noseG=ctx.createRadialGradient(-1,-19,1,0,-19,5);
-  noseG.addColorStop(0,'#5a1a0a');noseG.addColorStop(1,'#2d0c02');
-  ctx.fillStyle=noseG;
-  ctx.beginPath();ctx.ellipse(0,-19,5.5,3.5,0,0,Math.PI*2);ctx.fill();
-  // Nose shine
-  ctx.fillStyle='rgba(255,255,255,0.3)';
-  ctx.beginPath();ctx.ellipse(-1.5,-20,1.5,1,0,0,Math.PI*2);ctx.fill();
+  c.fillStyle='#2d0c02';
+  c.beginPath();c.ellipse(0,-17,4.5,3,0,0,Math.PI*2);c.fill();
+  c.fillStyle='rgba(255,255,255,0.3)';
+  c.beginPath();c.ellipse(-1.2,-18,1.3,0.9,0,0,Math.PI*2);c.fill();
 
   // Mouth
-  const bkOpen=A.mOpen*7;
-  const mShape=A.mShape;
-  ctx.strokeStyle='#5a2a0a';ctx.lineWidth=2;ctx.lineCap='round';
-  // Smile / frown shape
-  ctx.beginPath();
-  ctx.moveTo(-6,-10);
-  ctx.quadraticCurveTo(0,-7+mShape*4+bkOpen,6,-10);
-  ctx.stroke();
-  // Vertical center line
-  ctx.beginPath();ctx.moveTo(0,-13);ctx.lineTo(0,-10);ctx.stroke();
-
+  const bkOpen=A.mOpen*6;
+  c.strokeStyle='#5a2a0a';c.lineWidth=1.8;c.lineCap='round';
+  c.beginPath();c.moveTo(-5,-8);c.quadraticCurveTo(0,-5+A.mShape*3.5+bkOpen,5,-8);c.stroke();
+  c.beginPath();c.moveTo(0,-11);c.lineTo(0,-8);c.stroke();
   if(bkOpen>1){
-    // Mouth open interior
-    ctx.fillStyle='#361005';
-    ctx.beginPath();ctx.ellipse(0,-8+bkOpen*.3,5,bkOpen*.6,0,0,Math.PI*2);ctx.fill();
-    // Little tongue
-    if(bkOpen>3){
-      ctx.fillStyle='#e07070';
-      ctx.beginPath();ctx.ellipse(0,-7+bkOpen*.4,3,bkOpen*.35,0,0,Math.PI*2);ctx.fill();
-    }
+    c.fillStyle='#361005';
+    c.beginPath();c.ellipse(0,-6+bkOpen*.25,4,bkOpen*.5,0,0,Math.PI*2);c.fill();
   }
 
-  // Excited stars / sparkles
+  // Sparkles
   if(A.excite>0.3){
-    ctx.fillStyle='rgba(255,217,61,'+A.excite+')';
-    [[24,-18],[30,-5],[-28,-12],[-32,2]].forEach(([sx,sy])=>{
-      ctx.font=`${14*A.excite}px serif`;ctx.textAlign='center';
-      ctx.fillText('✦',sx,sy);
+    c.fillStyle='rgba(255,217,61,'+A.excite+')';
+    [[22,-16],[27,-4],[-25,-10],[-29,2]].forEach(([sx,sy])=>{
+      c.font=`${12*A.excite}px serif`;c.textAlign='center';
+      c.fillText('✦',sx,sy);
     });
   }
 
-  // Little bow tie on body (cute detail)
+  // Bow
   if(A.state!=='listening'){
-    ctx.save();
-    ctx.translate(0,3);
-    ctx.fillStyle='#FF6B6B';
-    ctx.beginPath();ctx.moveTo(-10,0);ctx.quadraticCurveTo(-5,-5,0,0);ctx.quadraticCurveTo(-5,5,-10,0);ctx.fill();
-    ctx.beginPath();ctx.moveTo(10,0);ctx.quadraticCurveTo(5,-5,0,0);ctx.quadraticCurveTo(5,5,10,0);ctx.fill();
-    ctx.fillStyle='#b91c1c';ctx.beginPath();ctx.ellipse(0,0,3,3,0,0,Math.PI*2);ctx.fill();
-    ctx.restore();
+    c.save();c.translate(0,3);
+    c.fillStyle='#FF6B6B';
+    c.beginPath();c.moveTo(-9,0);c.quadraticCurveTo(-4,-4,0,0);c.quadraticCurveTo(-4,4,-9,0);c.fill();
+    c.beginPath();c.moveTo(9,0);c.quadraticCurveTo(4,-4,0,0);c.quadraticCurveTo(4,4,9,0);c.fill();
+    c.fillStyle='#b91c1c';c.beginPath();c.ellipse(0,0,2.5,2.5,0,0,Math.PI*2);c.fill();
+    c.restore();
   }
-
-  ctx.restore();
+  c.restore();
+  c.restore();
 }
 
-function frame(){ctx.clearRect(0,0,W,H);drawBG();drawTeddy(W/2,H*.50);}
+function frame(){
+  ctx.clearRect(0,0,W,H);
+  drawBG(ctx,W,H);
+  drawTeddy(ctx, W/2, H*.50, W/200);
+
+  mctx.clearRect(0,0,MW,MH);
+  drawBG(mctx,MW,MH);
+  drawTeddy(mctx, MW/2, MH*.60, MW/220);
+}
 
 function tick(){
   A.t+=.016;A.stT+=.016;
-  A.breathY=Math.sin(A.t*1.2)*2.5;
+  A.breathY=Math.sin(A.t*1.2)*2.2;
   A.headTilt=Math.sin(A.t*.45)*.03;
-  A.pupX=Math.sin(A.t*.3)*2.5+Math.sin(A.t*.7)*1.2;
-  A.pupY=Math.sin(A.t*.35)*1.8;
+  A.pupX=Math.sin(A.t*.3)*2.2+Math.sin(A.t*.7)*1;
+  A.pupY=Math.sin(A.t*.35)*1.5;
   A.blinkNext--;
   if(A.blinkNext<=0){A.blinkT=Math.min(1,A.blinkT+.3);if(A.blinkT>=1){A.blinkT=Math.max(0,A.blinkT-.24);if(A.blinkT<=0)A.blinkNext=120+Math.random()*160;}}
   else A.blinkT=Math.max(0,A.blinkT-.24);
 
   if(A.state==='idle'){A.browR=lerp(A.browR,0,.05);A.mOpen=lerp(A.mOpen,0,.08);A.mShape=lerp(A.mShape,1,.04);A.waving=lerp(A.waving,0,.05);A.bounce=lerp(A.bounce,0,.06);A.excite=lerp(A.excite,0,.04);}
   else if(A.state==='thinking'){A.browR=lerp(A.browR,.35,.05);A.mOpen=lerp(A.mOpen,.05,.06);A.mShape=lerp(A.mShape,0,.05);A.waving=lerp(A.waving,0,.05);}
-  else if(A.state==='speaking'){A.browR=lerp(A.browR,.2,.04);A.phonTimer--;if(A.phonTimer<=0){A.phonIdx=(A.phonIdx+1)%PHON.length;A.phonTimer=2+Math.random()*5;}const[to,ts]=PHON[A.phonIdx];A.mOpen=lerp(A.mOpen,to,.3);A.mShape=lerp(A.mShape,ts,.24);}
+  else if(A.state==='speaking'){A.browR=lerp(A.browR,.2,.04);A.phonTimer--;if(A.phonTimer<=0){A.phonIdx=(A.phonIdx+1)%PHON.length;A.phonTimer=2+Math.random()*5;}const[to,ts2]=PHON[A.phonIdx];A.mOpen=lerp(A.mOpen,to,.3);A.mShape=lerp(A.mShape,ts2,.24);}
   else if(A.state==='listening'){A.browR=lerp(A.browR,.5,.05);A.mOpen=lerp(A.mOpen,.08,.06);}
-  else if(A.state==='excited'){A.waving=lerp(A.waving,1,.1);A.waveT+=.14;A.browR=lerp(A.browR,.9,.08);A.mShape=lerp(A.mShape,1,.08);A.mOpen=lerp(A.mOpen,.3,.1);A.bounce=lerp(A.bounce,1,.08)*Math.abs(Math.sin(A.t*8))*6;A.excite=lerp(A.excite,1,.08);if(A.stT>2.5)setState('idle');}
+  else if(A.state==='excited'){A.waving=lerp(A.waving,1,.1);A.waveT+=.14;A.browR=lerp(A.browR,.9,.08);A.mShape=lerp(A.mShape,1,.08);A.mOpen=lerp(A.mOpen,.3,.1);A.bounce=lerp(A.bounce,1,.08)*Math.abs(Math.sin(A.t*8))*5;A.excite=lerp(A.excite,1,.08);if(A.stT>2.5)setState('idle');}
   else if(A.state==='greeting'){A.waving=lerp(A.waving,1,.09);A.waveT+=.13;A.browR=lerp(A.browR,.8,.07);A.mOpen=lerp(A.mOpen,.25,.09);A.mShape=lerp(A.mShape,1,.07);if(A.stT>3)setState('idle');}
   frame();requestAnimationFrame(tick);
 }
 tick();
 
-function setState(s){
-  A.state=s;A.stT=0;
-  const d=document.getElementById('sdot'),l=document.getElementById('slbl'),v=document.getElementById('viz'),uv=document.getElementById('uviz'),mb=document.getElementById('micBtn'),ml=document.getElementById('mlbl'),mi=document.getElementById('micIcon');
-  d.className='sdot'+(s==='speaking'?' sp':s==='thinking'?' th':s==='listening'?' li':'');
-  l.textContent={idle:'Ready!',thinking:'Thinking…',speaking:'Buddy is talking!',listening:'Listening…',excited:'Yay!',greeting:'Hello!'}[s]||'Ready!';
-  v.classList.toggle('on',s==='speaking');
-  uv.classList.toggle('on',s==='listening');
-  mb.className=s==='listening'?'on':s==='speaking'?'speaking':'';
-  mi.textContent=s==='listening'?'🔴':s==='speaking'?'🔊':'🎙️';
-  ml.textContent=s==='listening'?'Listening! Tap to stop':s==='speaking'?'Buddy is talking!':'Tap to speak!';
-  ml.className='mlbl'+(s==='listening'?' on':s==='speaking'?' sp':'');
+function updateStateLabels(s) {
+  const stateText = {idle: t('ready'), thinking: t('thinking'), speaking: t('speaking'), listening: t('listening'), excited: t('excited'), greeting: t('greeting')};
+  const lbl = stateText[s] || t('ready');
+  document.getElementById('slbl').textContent = lbl;
+  document.getElementById('mbslbl').textContent = lbl;
+
+  const d = document.getElementById('sdot');
+  const mbd = document.getElementById('mbsdot');
+  const cls = 'sdot'+(s==='speaking'?' sp':s==='thinking'?' th':s==='listening'?' li':'');
+  const mbcls = 'mb-sdot'+(s==='speaking'?' sp':s==='thinking'?' th':s==='listening'?' li':'');
+  if(d) d.className = cls;
+  if(mbd) mbd.className = mbcls;
+
+  // viz
+  document.getElementById('viz').classList.toggle('on', s==='speaking');
+  document.getElementById('uviz').classList.toggle('on', s==='listening');
+  document.getElementById('mbviz').classList.toggle('on', s==='speaking');
+  document.getElementById('mbuviz').classList.toggle('on', s==='listening');
+
+  // mic buttons
+  ['micBtn','mobileMicBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.className = s==='listening'?'on':s==='speaking'?'speaking':'';
+  });
+  document.getElementById('micIcon').textContent = s==='listening'?'🔴':s==='speaking'?'🔊':'🎙️';
+  document.getElementById('mobileMicIcon').textContent = s==='listening'?'🔴':s==='speaking'?'🔊':'🎙️';
+
+  const mlbl = document.getElementById('mlbl');
+  const mbmlbl = document.getElementById('mbmlbl');
+  const mlblTxt = s==='listening'? t('listeningStop') : s==='speaking'? t('buddyTalking') : t('tapSpeak');
+  if(mlbl) { mlbl.textContent = mlblTxt; mlbl.className='mlbl'+(s==='listening'?' on':s==='speaking'?' sp':''); }
+  if(mbmlbl) mbmlbl.textContent = s==='listening'? t('speak') : s==='speaking'? '🔊' : t('speak');
 }
 
-// ═══════════════════════════════════════════════════
-//  RICH PHONICS DATA — Multiple sounds per letter
-// ═══════════════════════════════════════════════════
+function setState(s){
+  A.state=s; A.stT=0;
+  updateStateLabels(s);
+}
+
+// ═══════════════════════════════════════════════
+// PHONICS DATA
+// ═══════════════════════════════════════════════
 const LETTERS=[
-  {l:'A',w:'Apple',e:'🍎',
-   sounds:[
+  {l:'A',w:'Apple',e:'🍎',sounds:[
     {type:'short',icon:'🍎',label:'Short A',symbol:'/ă/',desc:'as in <em>apple</em>, <em>cat</em>, <em>hat</em>',speak:'short A, as in apple, cat, hat'},
-    {type:'long', icon:'🎂',label:'Long A', symbol:'/ā/',desc:'as in <em>cake</em>, <em>rain</em>, <em>name</em>',speak:'long A, as in cake, rain, name'},
-    {type:'other',icon:'🧡',label:'Other A', symbol:'/ah/',desc:'as in <em>father</em>, <em>car</em>, <em>star</em>',speak:'ah sound, as in father, car, star'},
-   ],ex:'A is for Apple. A, Apple!'},
-  {l:'B',w:'Ball',e:'⚽',
-   sounds:[
-    {type:'short',icon:'⚽',label:'B Sound',symbol:'/b/',desc:'as in <em>ball</em>, <em>bat</em>, <em>bed</em>',speak:'B sound, as in ball, bat, bed'},
-   ],ex:'B is for Ball. B, Ball!'},
-  {l:'C',w:'Cat',e:'🐱',
-   sounds:[
+    {type:'long',icon:'🎂',label:'Long A',symbol:'/ā/',desc:'as in <em>cake</em>, <em>rain</em>, <em>name</em>',speak:'long A, as in cake, rain, name'},
+    {type:'other',icon:'🧡',label:'Other A',symbol:'/ah/',desc:'as in <em>father</em>, <em>car</em>, <em>star</em>',speak:'ah sound, as in father, car, star'},
+  ],ex:'A is for Apple. A, Apple!'},
+  {l:'B',w:'Ball',e:'⚽',sounds:[{type:'short',icon:'⚽',label:'B Sound',symbol:'/b/',desc:'as in <em>ball</em>, <em>bat</em>, <em>bed</em>',speak:'B sound, as in ball, bat, bed'}],ex:'B is for Ball. B, Ball!'},
+  {l:'C',w:'Cat',e:'🐱',sounds:[
     {type:'short',icon:'🐱',label:'Hard C',symbol:'/k/',desc:'as in <em>cat</em>, <em>cup</em>, <em>coat</em>',speak:'hard C, as in cat, cup, coat'},
-    {type:'long', icon:'🧊',label:'Soft C',symbol:'/s/',desc:'as in <em>city</em>, <em>cent</em>, <em>ice</em>',speak:'soft C, as in city, cent, ice'},
-   ],ex:'C is for Cat. C, Cat!'},
-  {l:'D',w:'Dog',e:'🐶',
-   sounds:[
-    {type:'short',icon:'🐶',label:'D Sound',symbol:'/d/',desc:'as in <em>dog</em>, <em>dig</em>, <em>door</em>',speak:'D sound, as in dog, dig, door'},
-   ],ex:'D is for Dog. D, Dog!'},
-  {l:'E',w:'Elephant',e:'🐘',
-   sounds:[
+    {type:'long',icon:'🧊',label:'Soft C',symbol:'/s/',desc:'as in <em>city</em>, <em>cent</em>, <em>ice</em>',speak:'soft C, as in city, cent, ice'},
+  ],ex:'C is for Cat. C, Cat!'},
+  {l:'D',w:'Dog',e:'🐶',sounds:[{type:'short',icon:'🐶',label:'D Sound',symbol:'/d/',desc:'as in <em>dog</em>, <em>dig</em>, <em>door</em>',speak:'D sound, as in dog, dig, door'}],ex:'D is for Dog. D, Dog!'},
+  {l:'E',w:'Elephant',e:'🐘',sounds:[
     {type:'short',icon:'🐘',label:'Short E',symbol:'/ĕ/',desc:'as in <em>elephant</em>, <em>bed</em>, <em>red</em>',speak:'short E, as in elephant, bed, red'},
-    {type:'long', icon:'🦅',label:'Long E', symbol:'/ē/',desc:'as in <em>eagle</em>, <em>sweet</em>, <em>tree</em>',speak:'long E, as in eagle, sweet, tree'},
-   ],ex:'E is for Elephant. E, Elephant!'},
-  {l:'F',w:'Fish',e:'🐟',
-   sounds:[
-    {type:'short',icon:'🐟',label:'F Sound',symbol:'/f/',desc:'as in <em>fish</em>, <em>fun</em>, <em>frog</em>',speak:'F sound, as in fish, fun, frog'},
-   ],ex:'F is for Fish. F, Fish!'},
-  {l:'G',w:'Grapes',e:'🍇',
-   sounds:[
+    {type:'long',icon:'🦅',label:'Long E',symbol:'/ē/',desc:'as in <em>eagle</em>, <em>sweet</em>, <em>tree</em>',speak:'long E, as in eagle, sweet, tree'},
+  ],ex:'E is for Elephant. E, Elephant!'},
+  {l:'F',w:'Fish',e:'🐟',sounds:[{type:'short',icon:'🐟',label:'F Sound',symbol:'/f/',desc:'as in <em>fish</em>, <em>fun</em>, <em>frog</em>',speak:'F sound, as in fish, fun, frog'}],ex:'F is for Fish. F, Fish!'},
+  {l:'G',w:'Grapes',e:'🍇',sounds:[
     {type:'short',icon:'🍇',label:'Hard G',symbol:'/ɡ/',desc:'as in <em>grapes</em>, <em>go</em>, <em>good</em>',speak:'hard G, as in grapes, go, good'},
-    {type:'long', icon:'🧊',label:'Soft G',symbol:'/dʒ/',desc:'as in <em>giraffe</em>, <em>gem</em>, <em>gym</em>',speak:'soft G, as in giraffe, gem, gym'},
-   ],ex:'G is for Grapes. G, Grapes!'},
-  {l:'H',w:'Hat',e:'🎩',
-   sounds:[
-    {type:'short',icon:'🎩',label:'H Sound',symbol:'/h/',desc:'as in <em>hat</em>, <em>hop</em>, <em>hill</em>',speak:'H sound, as in hat, hop, hill'},
-   ],ex:'H is for Hat. H, Hat!'},
-  {l:'I',w:'Ice cream',e:'🍦',
-   sounds:[
+    {type:'long',icon:'🧊',label:'Soft G',symbol:'/dʒ/',desc:'as in <em>giraffe</em>, <em>gem</em>, <em>gym</em>',speak:'soft G, as in giraffe, gem, gym'},
+  ],ex:'G is for Grapes. G, Grapes!'},
+  {l:'H',w:'Hat',e:'🎩',sounds:[{type:'short',icon:'🎩',label:'H Sound',symbol:'/h/',desc:'as in <em>hat</em>, <em>hop</em>, <em>hill</em>',speak:'H sound, as in hat, hop, hill'}],ex:'H is for Hat. H, Hat!'},
+  {l:'I',w:'Ice cream',e:'🍦',sounds:[
     {type:'short',icon:'🍦',label:'Short I',symbol:'/ĭ/',desc:'as in <em>igloo</em>, <em>sit</em>, <em>big</em>',speak:'short I, as in igloo, sit, big'},
-    {type:'long', icon:'🧊',label:'Long I', symbol:'/ī/',desc:'as in <em>ice</em>, <em>kite</em>, <em>time</em>',speak:'long I, as in ice, kite, time'},
-   ],ex:'I is for Ice cream. I, Ice cream!'},
-  {l:'J',w:'Jellyfish',e:'🪼',
-   sounds:[
-    {type:'short',icon:'🪼',label:'J Sound',symbol:'/dʒ/',desc:'as in <em>jellyfish</em>, <em>jump</em>, <em>jar</em>',speak:'J sound, as in jellyfish, jump, jar'},
-   ],ex:'J is for Jellyfish. J, Jellyfish!'},
-  {l:'K',w:'Kite',e:'🪁',
-   sounds:[
-    {type:'short',icon:'🪁',label:'K Sound',symbol:'/k/',desc:'as in <em>kite</em>, <em>king</em>, <em>kick</em>',speak:'K sound, as in kite, king, kick'},
-   ],ex:'K is for Kite. K, Kite!'},
-  {l:'L',w:'Lion',e:'🦁',
-   sounds:[
-    {type:'short',icon:'🦁',label:'L Sound',symbol:'/l/',desc:'as in <em>lion</em>, <em>lamp</em>, <em>leaf</em>',speak:'L sound, as in lion, lamp, leaf'},
-   ],ex:'L is for Lion. L, Lion!'},
-  {l:'M',w:'Moon',e:'🌙',
-   sounds:[
-    {type:'short',icon:'🌙',label:'M Sound',symbol:'/m/',desc:'as in <em>moon</em>, <em>map</em>, <em>milk</em>',speak:'M sound, as in moon, map, milk'},
-   ],ex:'M is for Moon. M, Moon!'},
-  {l:'N',w:'Nest',e:'🪺',
-   sounds:[
-    {type:'short',icon:'🪺',label:'N Sound',symbol:'/n/',desc:'as in <em>nest</em>, <em>nap</em>, <em>net</em>',speak:'N sound, as in nest, nap, net'},
-   ],ex:'N is for Nest. N, Nest!'},
-  {l:'O',w:'Orange',e:'🍊',
-   sounds:[
+    {type:'long',icon:'🧊',label:'Long I',symbol:'/ī/',desc:'as in <em>ice</em>, <em>kite</em>, <em>time</em>',speak:'long I, as in ice, kite, time'},
+  ],ex:'I is for Ice cream. I, Ice cream!'},
+  {l:'J',w:'Jellyfish',e:'🪼',sounds:[{type:'short',icon:'🪼',label:'J Sound',symbol:'/dʒ/',desc:'as in <em>jellyfish</em>, <em>jump</em>, <em>jar</em>',speak:'J sound, as in jellyfish, jump, jar'}],ex:'J is for Jellyfish. J, Jellyfish!'},
+  {l:'K',w:'Kite',e:'🪁',sounds:[{type:'short',icon:'🪁',label:'K Sound',symbol:'/k/',desc:'as in <em>kite</em>, <em>king</em>, <em>kick</em>',speak:'K sound, as in kite, king, kick'}],ex:'K is for Kite. K, Kite!'},
+  {l:'L',w:'Lion',e:'🦁',sounds:[{type:'short',icon:'🦁',label:'L Sound',symbol:'/l/',desc:'as in <em>lion</em>, <em>lamp</em>, <em>leaf</em>',speak:'L sound, as in lion, lamp, leaf'}],ex:'L is for Lion. L, Lion!'},
+  {l:'M',w:'Moon',e:'🌙',sounds:[{type:'short',icon:'🌙',label:'M Sound',symbol:'/m/',desc:'as in <em>moon</em>, <em>map</em>, <em>milk</em>',speak:'M sound, as in moon, map, milk'}],ex:'M is for Moon. M, Moon!'},
+  {l:'N',w:'Nest',e:'🪺',sounds:[{type:'short',icon:'🪺',label:'N Sound',symbol:'/n/',desc:'as in <em>nest</em>, <em>nap</em>, <em>net</em>',speak:'N sound, as in nest, nap, net'}],ex:'N is for Nest. N, Nest!'},
+  {l:'O',w:'Orange',e:'🍊',sounds:[
     {type:'short',icon:'🍊',label:'Short O',symbol:'/ŏ/',desc:'as in <em>orange</em>, <em>hot</em>, <em>pot</em>',speak:'short O, as in orange, hot, pot'},
-    {type:'long', icon:'🌊',label:'Long O', symbol:'/ō/',desc:'as in <em>open</em>, <em>boat</em>, <em>note</em>',speak:'long O, as in open, boat, note'},
+    {type:'long',icon:'🌊',label:'Long O',symbol:'/ō/',desc:'as in <em>open</em>, <em>boat</em>, <em>note</em>',speak:'long O, as in open, boat, note'},
     {type:'other',icon:'🦮',label:'Oo Sound',symbol:'/oo/',desc:'as in <em>moon</em>, <em>food</em>, <em>cool</em>',speak:'oo sound, as in moon, food, cool'},
-   ],ex:'O is for Orange. O, Orange!'},
-  {l:'P',w:'Penguin',e:'🐧',
-   sounds:[
-    {type:'short',icon:'🐧',label:'P Sound',symbol:'/p/',desc:'as in <em>penguin</em>, <em>pop</em>, <em>pin</em>',speak:'P sound, as in penguin, pop, pin'},
-   ],ex:'P is for Penguin. P, Penguin!'},
-  {l:'Q',w:'Queen',e:'👑',
-   sounds:[
-    {type:'short',icon:'👑',label:'QU Sound',symbol:'/kw/',desc:'as in <em>queen</em>, <em>quack</em>, <em>quiz</em>',speak:'Q W sound, as in queen, quack, quiz'},
-   ],ex:'Q is for Queen. Q, Queen!'},
-  {l:'R',w:'Rainbow',e:'🌈',
-   sounds:[
-    {type:'short',icon:'🌈',label:'R Sound',symbol:'/r/',desc:'as in <em>rainbow</em>, <em>run</em>, <em>red</em>',speak:'R sound, as in rainbow, run, red'},
-   ],ex:'R is for Rainbow. R, Rainbow!'},
-  {l:'S',w:'Sun',e:'☀️',
-   sounds:[
+  ],ex:'O is for Orange. O, Orange!'},
+  {l:'P',w:'Penguin',e:'🐧',sounds:[{type:'short',icon:'🐧',label:'P Sound',symbol:'/p/',desc:'as in <em>penguin</em>, <em>pop</em>, <em>pin</em>',speak:'P sound, as in penguin, pop, pin'}],ex:'P is for Penguin. P, Penguin!'},
+  {l:'Q',w:'Queen',e:'👑',sounds:[{type:'short',icon:'👑',label:'QU Sound',symbol:'/kw/',desc:'as in <em>queen</em>, <em>quack</em>, <em>quiz</em>',speak:'Q W sound, as in queen, quack, quiz'}],ex:'Q is for Queen. Q, Queen!'},
+  {l:'R',w:'Rainbow',e:'🌈',sounds:[{type:'short',icon:'🌈',label:'R Sound',symbol:'/r/',desc:'as in <em>rainbow</em>, <em>run</em>, <em>red</em>',speak:'R sound, as in rainbow, run, red'}],ex:'R is for Rainbow. R, Rainbow!'},
+  {l:'S',w:'Sun',e:'☀️',sounds:[
     {type:'short',icon:'☀️',label:'S Sound',symbol:'/s/',desc:'as in <em>sun</em>, <em>sit</em>, <em>soup</em>',speak:'S sound, as in sun, sit, soup'},
-    {type:'long', icon:'🎵',label:'Z Sound',symbol:'/z/',desc:'S says Z in <em>dogs</em>, <em>nose</em>, <em>easy</em>',speak:'S says Z in dogs, nose, easy'},
+    {type:'long',icon:'🎵',label:'Z Sound',symbol:'/z/',desc:'S says Z in <em>dogs</em>, <em>nose</em>, <em>easy</em>',speak:'S says Z in dogs, nose, easy'},
     {type:'other',icon:'🎸',label:'SH Sound',symbol:'/ʃ/',desc:'as in <em>shoe</em>, <em>ship</em>, <em>fish</em>',speak:'SH sound, as in shoe, ship, fish'},
-   ],ex:'S is for Sun. S, Sun!'},
-  {l:'T',w:'Tiger',e:'🐯',
-   sounds:[
+  ],ex:'S is for Sun. S, Sun!'},
+  {l:'T',w:'Tiger',e:'🐯',sounds:[
     {type:'short',icon:'🐯',label:'T Sound',symbol:'/t/',desc:'as in <em>tiger</em>, <em>top</em>, <em>ten</em>',speak:'T sound, as in tiger, top, ten'},
-    {type:'long', icon:'🌊',label:'TH Sound',symbol:'/θ/',desc:'as in <em>the</em>, <em>this</em>, <em>three</em>',speak:'TH sound, as in the, this, three'},
-   ],ex:'T is for Tiger. T, Tiger!'},
-  {l:'U',w:'Umbrella',e:'☂️',
-   sounds:[
+    {type:'long',icon:'🌊',label:'TH Sound',symbol:'/θ/',desc:'as in <em>the</em>, <em>this</em>, <em>three</em>',speak:'TH sound, as in the, this, three'},
+  ],ex:'T is for Tiger. T, Tiger!'},
+  {l:'U',w:'Umbrella',e:'☂️',sounds:[
     {type:'short',icon:'☂️',label:'Short U',symbol:'/ŭ/',desc:'as in <em>umbrella</em>, <em>cup</em>, <em>bug</em>',speak:'short U, as in umbrella, cup, bug'},
-    {type:'long', icon:'🦄',label:'Long U', symbol:'/ū/',desc:'as in <em>uniform</em>, <em>cube</em>, <em>cute</em>',speak:'long U, as in uniform, cube, cute'},
-   ],ex:'U is for Umbrella. U, Umbrella!'},
-  {l:'V',w:'Volcano',e:'🌋',
-   sounds:[
-    {type:'short',icon:'🌋',label:'V Sound',symbol:'/v/',desc:'as in <em>volcano</em>, <em>van</em>, <em>vine</em>',speak:'V sound, as in volcano, van, vine'},
-   ],ex:'V is for Volcano. V, Volcano!'},
-  {l:'W',w:'Whale',e:'🐋',
-   sounds:[
-    {type:'short',icon:'🐋',label:'W Sound',symbol:'/w/',desc:'as in <em>whale</em>, <em>win</em>, <em>web</em>',speak:'W sound, as in whale, win, web'},
-   ],ex:'W is for Whale. W, Whale!'},
-  {l:'X',w:'Xylophone',e:'🎵',
-   sounds:[
-    {type:'short',icon:'🎵',label:'X = Z',  symbol:'/z/',desc:'X says Z at start: <em>xylophone</em>, <em>xerox</em>',speak:'X says Z at the start, like xylophone'},
-    {type:'long', icon:'🦊',label:'X = KS', symbol:'/ks/',desc:'X says KS at end: <em>fox</em>, <em>box</em>, <em>mix</em>',speak:'X says K S at the end, like fox, box, mix'},
-   ],ex:'X is for Xylophone. X, Xylophone!'},
-  {l:'Y',w:'Yacht',e:'⛵',
-   sounds:[
+    {type:'long',icon:'🦄',label:'Long U',symbol:'/ū/',desc:'as in <em>uniform</em>, <em>cube</em>, <em>cute</em>',speak:'long U, as in uniform, cube, cute'},
+  ],ex:'U is for Umbrella. U, Umbrella!'},
+  {l:'V',w:'Volcano',e:'🌋',sounds:[{type:'short',icon:'🌋',label:'V Sound',symbol:'/v/',desc:'as in <em>volcano</em>, <em>van</em>, <em>vine</em>',speak:'V sound, as in volcano, van, vine'}],ex:'V is for Volcano. V, Volcano!'},
+  {l:'W',w:'Whale',e:'🐋',sounds:[{type:'short',icon:'🐋',label:'W Sound',symbol:'/w/',desc:'as in <em>whale</em>, <em>win</em>, <em>web</em>',speak:'W sound, as in whale, win, web'}],ex:'W is for Whale. W, Whale!'},
+  {l:'X',w:'Xylophone',e:'🎵',sounds:[
+    {type:'short',icon:'🎵',label:'X = Z',symbol:'/z/',desc:'X says Z at start: <em>xylophone</em>',speak:'X says Z at the start, like xylophone'},
+    {type:'long',icon:'🦊',label:'X = KS',symbol:'/ks/',desc:'X says KS at end: <em>fox</em>, <em>box</em>',speak:'X says K S at the end, like fox, box'},
+  ],ex:'X is for Xylophone. X, Xylophone!'},
+  {l:'Y',w:'Yacht',e:'⛵',sounds:[
     {type:'short',icon:'⛵',label:'Y Consonant',symbol:'/j/',desc:'as in <em>yacht</em>, <em>yes</em>, <em>yell</em>',speak:'Y consonant, as in yacht, yes, yell'},
-    {type:'long', icon:'🌞',label:'Y = Long E',symbol:'/ē/',desc:'Y says long E: <em>happy</em>, <em>funny</em>, <em>baby</em>',speak:'Y says long E, like happy, funny, baby'},
-    {type:'other',icon:'🍬',label:'Y = Long I',symbol:'/ī/',desc:'Y says long I: <em>fly</em>, <em>sky</em>, <em>cry</em>',speak:'Y says long I, like fly, sky, cry'},
-   ],ex:'Y is for Yacht. Y, Yacht!'},
-  {l:'Z',w:'Zebra',e:'🦓',
-   sounds:[
-    {type:'short',icon:'🦓',label:'Z Sound',symbol:'/z/',desc:'as in <em>zebra</em>, <em>zip</em>, <em>zoo</em>',speak:'Z sound, as in zebra, zip, zoo'},
-   ],ex:'Z is for Zebra. Z, Zebra!'},
+    {type:'long',icon:'🌞',label:'Y = Long E',symbol:'/ē/',desc:'Y says long E: <em>happy</em>, <em>funny</em>',speak:'Y says long E, like happy, funny'},
+    {type:'other',icon:'🍬',label:'Y = Long I',symbol:'/ī/',desc:'Y says long I: <em>fly</em>, <em>sky</em>',speak:'Y says long I, like fly, sky'},
+  ],ex:'Y is for Yacht. Y, Yacht!'},
+  {l:'Z',w:'Zebra',e:'🦓',sounds:[{type:'short',icon:'🦓',label:'Z Sound',symbol:'/z/',desc:'as in <em>zebra</em>, <em>zip</em>, <em>zoo</em>',speak:'Z sound, as in zebra, zip, zoo'}],ex:'Z is for Zebra. Z, Zebra!'},
 ];
 
-// ═══════════════════════════════════════════════════
-//  APP STATE
-// ═══════════════════════════════════════════════════
-let curIdx=0,mode='learn',stars=0,learned=0,answered=false,mc=0;
-let isListening=false,recog=null;
+// ═══════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════
+let curIdx=0, mode='learn', stars=0, learned=0, answered=false, mc=0;
+let isListening=false, recog=null;
 
-function buildAlphaBar(){
-  const bar=document.getElementById('alphaBar');
-  bar.innerHTML='';
-  LETTERS.forEach((item,i)=>{
-    const b=document.createElement('button');
-    b.className='ab'+(i===0?' active':'');
-    b.textContent=item.l;
-    b.onclick=()=>selectLetter(i);
-    bar.appendChild(b);
+function buildAlphaBars(){
+  ['alphaBar','mobileAlphaBar'].forEach((id,barIdx) => {
+    const bar = document.getElementById(id);
+    if(!bar) return;
+    bar.innerHTML = '';
+    LETTERS.forEach((item,i) => {
+      const b = document.createElement('button');
+      b.className = (barIdx===0?'ab':'mab')+(i===0?' active':'');
+      b.textContent = item.l;
+      b.onclick = () => selectLetter(i);
+      bar.appendChild(b);
+    });
   });
 }
-buildAlphaBar();
+buildAlphaBars();
 
 function selectLetter(idx){
-  curIdx=idx;
-  document.querySelectorAll('.ab').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  const bar=document.getElementById('alphaBar');
-  bar.children[idx]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  if(mode==='learn')showLearnPanel();
-  else if(mode==='quiz')showQuizPanel();
+  curIdx = idx;
+  ['alphaBar','mobileAlphaBar'].forEach((id,barIdx) => {
+    const bar = document.getElementById(id);
+    if(!bar) return;
+    [...bar.children].forEach((b,i) => b.classList.toggle('active', i===idx));
+    bar.children[idx]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  });
+  if(mode==='learn') showLearnPanel();
+  else if(mode==='quiz') showQuizPanel();
 }
 
 function setMode(m){
-  mode=m;answered=false;
-  ['learn','quiz','chat'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===m));
-  if(m==='learn')showLearnPanel();
-  else if(m==='quiz')showQuizPanel();
+  mode = m; answered = false;
+  ['learn','quiz','chat'].forEach(x => {
+    document.getElementById('tab-'+x)?.classList.toggle('active', x===m);
+    document.getElementById('btab-'+x)?.classList.toggle('active', x===m);
+  });
+  // update bottom nav labels
+  document.getElementById('blearn-lbl').textContent = t('learnTab');
+  document.getElementById('bquiz-lbl').textContent = t('quizTab');
+  document.getElementById('bchat-lbl').textContent = t('chatTab');
+  if(m==='learn') showLearnPanel();
+  else if(m==='quiz') showQuizPanel();
   else showChatPanel();
 }
 
-// ═══════════════════════════════════════════════════
-//  LEARN PANEL — with rich phonics cards
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// LEARN PANEL
+// ═══════════════════════════════════════════════
 function showLearnPanel(){
-  const L=LETTERS[curIdx];
-  document.getElementById('topTitle').textContent=`📖 Learning "${L.l}"`;
-  document.getElementById('topSub').textContent=`${L.l} is for ${L.w}!`;
-  answered=false;
+  const L = LETTERS[curIdx];
+  const tr = LETTER_TRANS[L.l];
+  document.getElementById('topTitle').textContent = t('learningLabel', L.l);
+  document.getElementById('topSub').textContent = t('isForLabel', L.l, L.w);
+  answered = false;
 
-  const phonicsCardsHTML=L.sounds.map((s,i)=>`
+  // Translation pills
+  let transPills = '';
+  if(currentLang==='hi' && tr) {
+    transPills = `<div class="letter-trans"><div class="trans-pill"><span class="tl">हिंदी</span>${tr.hi}</div></div>`;
+  } else if(currentLang==='zh' && tr) {
+    transPills = `<div class="letter-trans"><div class="trans-pill"><span class="tl">中文</span>${tr.zh}</div></div>`;
+  } else if(tr) {
+    transPills = `<div class="letter-trans"><div class="trans-pill"><span class="tl">हिंदी</span>${tr.hi}</div><div class="trans-pill"><span class="tl">中文</span>${tr.zh}</div></div>`;
+  }
+
+  const phonicsCardsHTML = L.sounds.map((s,i) => `
     <div class="phonics-card ${s.type}-sound" onclick="hearPhonics(${curIdx},${i})">
       <div class="pc-icon">${s.icon}</div>
       <div class="pc-body">
@@ -738,244 +971,274 @@ function showLearnPanel(){
         <div class="pc-sound">${s.symbol}</div>
         <div class="pc-examples">${s.desc}</div>
       </div>
-      <button class="hear-sound-btn" onclick="event.stopPropagation();hearPhonics(${curIdx},${i})">🔊 Hear</button>
+      <button class="hear-sound-btn" onclick="event.stopPropagation();hearPhonics(${curIdx},${i})">${t('hearSound')}</button>
     </div>
   `).join('');
 
-  const panel=document.getElementById('lesson-panel');
-  panel.innerHTML=`
+  const panel = document.getElementById('lesson-panel');
+  panel.innerHTML = `
     <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${((curIdx+1)/26*100).toFixed(0)}%"></div></div>
     <div class="letter-hero">
       <div class="big-letter">${L.l}</div>
-      <div class="letter-word">${L.l} is for ${L.w}</div>
+      <div class="letter-word">${currentLang==='hi'?`${L.l} से ${L.w}`:currentLang==='zh'?`${L.l} 代表 ${L.w}`:`${L.l} is for ${L.w}`}</div>
       <div class="letter-emoji">${L.e}</div>
+      ${transPills}
       <div class="phonics-section">
-        <div class="phonics-title">🔤 Phonics Sounds</div>
+        <div class="phonics-title">${t('phonicsSounds')}</div>
         <div class="phonics-cards">${phonicsCardsHTML}</div>
       </div>
       <div class="letter-sentence">"${L.ex}"</div>
     </div>
-    <div class="buddy-says" id="buddySays">Hi! I'm Buddy! Today we learn the letter ${L.l}! Tap any sound card to hear it! 🐻</div>
+    <div class="buddy-says" id="buddySays">${t('buddyIntro', L.l)}</div>
     <div class="action-row">
-      <button class="abtn hear" onclick="hearLetter()">🔊 Hear it!</button>
-      <button class="abtn next" onclick="nextLetter()" id="nextBtn">Next Letter ➜</button>
+      <button class="abtn hear" onclick="hearLetter()">${t('hearIt')}</button>
+      <button class="abtn next" onclick="nextLetter()" id="nextBtn">${t('nextLetter')}</button>
     </div>
   `;
-
-  setTimeout(()=>teachLetter(L), 400);
+  document.getElementById('buddyQuickMsg').textContent = t('isForLabel', L.l, L.w);
+  setTimeout(() => teachLetter(L), 400);
 }
 
 function hearPhonics(letterIdx, soundIdx){
-  const L=LETTERS[letterIdx];
-  const s=L.sounds[soundIdx];
-  const text=`${s.label}! ${s.symbol}. ${s.speak}. Can you say it?`;
+  const L = LETTERS[letterIdx];
+  const s = L.sounds[soundIdx];
+  const text = t('speakPhonics', s.label, s.symbol, s.speak);
   setState('speaking');
-  speakText(text,()=>{setState('idle');});
-  // Update buddy says
-  const bs=document.getElementById('buddySays');
-  if(bs) bs.textContent=`${s.label}: ${s.symbol} — ${s.speak}`;
+  speakText(text, () => setState('idle'));
+  const bs = document.getElementById('buddySays');
+  if(bs) bs.textContent = `${s.label}: ${s.symbol} — ${s.speak}`;
 }
 
 function teachLetter(L){
-  const mainSound=L.sounds[0];
-  const allSounds=L.sounds.map(s=>s.speak).join('. Also, ');
-  speakText(`${L.l}! ${L.l} is for ${L.w}! ${allSounds}. Can you say ${L.l}?`,()=>{});
+  const allSounds = L.sounds.map(s => s.speak).join('. Also, ');
+  speakText(t('speakTeach', L.l, L.w, allSounds), () => {});
   setState('speaking');
 }
 
 function hearLetter(){
-  const L=LETTERS[curIdx];
-  const allSounds=L.sounds.map(s=>s.speak).join('. ');
-  speakText(`${L.l}! ${L.l} for ${L.w}! Sounds: ${allSounds}`,()=>{setState('idle');});
+  const L = LETTERS[curIdx];
+  const allSounds = L.sounds.map(s => s.speak).join('. ');
+  speakText(t('speakHear', L.l, L.w, allSounds), () => setState('idle'));
 }
 
-// ═══════════════════════════════════════════════════
-//  QUIZ PANEL
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// QUIZ PANEL
+// ═══════════════════════════════════════════════
 function showQuizPanel(){
-  const L=LETTERS[curIdx];
-  document.getElementById('topTitle').textContent=`🎯 Quiz Time!`;
-  document.getElementById('topSub').textContent=`Which letter makes this sound?`;
-  answered=false;
+  const L = LETTERS[curIdx];
+  const tr = LETTER_TRANS[L.l];
+  document.getElementById('topTitle').textContent = t('quizTitle');
+  document.getElementById('topSub').textContent = t('quizSub');
+  answered = false;
 
-  let opts=[L.l];
-  while(opts.length<4){const r=LETTERS[Math.floor(Math.random()*26)].l;if(!opts.includes(r))opts.push(r);}
-  opts.sort(()=>Math.random()-.5);
+  let opts = [L.l];
+  while(opts.length < 4){ const r = LETTERS[Math.floor(Math.random()*26)].l; if(!opts.includes(r)) opts.push(r); }
+  opts.sort(() => Math.random()-.5);
 
-  const panel=document.getElementById('lesson-panel');
-  panel.innerHTML=`
+  let transBadge = '';
+  if(currentLang==='hi' && tr) transBadge = `<div class="trans-pill" style="margin-top:6px;"><span class="tl">हिंदी</span>${tr.hi}</div>`;
+  else if(currentLang==='zh' && tr) transBadge = `<div class="trans-pill" style="margin-top:6px;"><span class="tl">中文</span>${tr.zh}</div>`;
+
+  const panel = document.getElementById('lesson-panel');
+  panel.innerHTML = `
     <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${((curIdx+1)/26*100).toFixed(0)}%"></div></div>
     <div class="letter-hero" style="padding:14px 14px 12px;">
-      <div class="letter-emoji" style="font-size:72px;margin:0 0 8px;">${L.e}</div>
-      <div class="letter-word" style="font-size:22px;">${L.w}</div>
-      <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;width:100%;">
-        ${L.sounds.map(s=>`<div style="background:rgba(255,255,255,.05);border-radius:10px;padding:7px 12px;font-size:12px;color:rgba(255,255,255,.75);font-weight:700;">${s.symbol} — ${s.label}</div>`).join('')}
+      <div class="letter-emoji" style="font-size:60px;margin:0 0 6px;">${L.e}</div>
+      <div class="letter-word" style="font-size:20px;">${L.w}</div>
+      ${transBadge}
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;width:100%;">
+        ${L.sounds.map(s=>`<div style="background:rgba(255,255,255,.05);border-radius:9px;padding:6px 11px;font-size:11px;color:rgba(255,255,255,.75);font-weight:700;">${s.symbol} — ${s.label}</div>`).join('')}
       </div>
     </div>
-    <div class="buddy-says" id="buddySays">Which letter makes these sounds? Tap the right letter! 🎯</div>
+    <div class="buddy-says" id="buddySays">${t('whichLetter')}</div>
     <div class="choices-wrap" id="choicesWrap">
       ${opts.map(o=>`<button class="choice" onclick="checkAnswer('${o}','${L.l}',this)">${o}</button>`).join('')}
     </div>
-    <button class="abtn next" onclick="nextLetter()" id="nextBtn" disabled style="margin-top:0;">Next ➜</button>
+    <button class="abtn next" onclick="nextLetter()" id="nextBtn" disabled style="margin-top:0;">${t('nextBtn')}</button>
   `;
-
-  speakText(`Which letter is this? ${L.w} starts with which letter? Find it!`,()=>{});
+  document.getElementById('buddyQuickMsg').textContent = t('quizSub');
+  speakText(t('speakQuiz', L.w), () => {});
 }
 
-function checkAnswer(chosen,correct,btn){
-  if(answered)return;
-  answered=true;
-  const L=LETTERS[curIdx];
+function checkAnswer(chosen, correct, btn){
+  if(answered) return;
+  answered = true;
+  const L = LETTERS[curIdx];
   if(btn) btn.classList.add(chosen===correct?'correct':'wrong');
   if(chosen!==correct){
-    document.querySelectorAll('.choice').forEach(b=>{
+    document.querySelectorAll('.choice').forEach(b => {
       if(b.textContent.trim()===correct) b.classList.add('correct');
     });
   }
-  document.querySelectorAll('.choice').forEach(b=>b.style.pointerEvents='none');
+  document.querySelectorAll('.choice').forEach(b => b.style.pointerEvents='none');
 
   if(chosen===correct){
-    stars+=2;document.getElementById('starCount').textContent=stars;
-    learned++;document.getElementById('lessonCount').textContent=learned;
-    const bs=document.getElementById('buddySays');
-    if(bs) bs.textContent=`Amazing! ${correct} is correct! You got 2 stars! Well done!`;
-    setState('excited');confetti();
-    speakText(`Yes! Amazing! ${correct}! ${correct} is for ${L.w}! You earned 2 stars!`,()=>{setState('idle');});
+    stars += 2;
+    document.getElementById('starCount').textContent = stars;
+    document.getElementById('starCount2').textContent = stars;
+    learned++;
+    document.getElementById('lessonCount').textContent = learned;
+    const bs = document.getElementById('buddySays');
+    if(bs) bs.textContent = t('correct2Stars', correct);
+    setState('excited'); confetti();
+    speakText(t('speakCorrect', correct, L.w), () => setState('idle'));
   } else {
-    const bs=document.getElementById('buddySays');
-    if(bs) bs.textContent=`Almost! The letter is ${correct}. ${correct} is for ${L.w}. You will get it next time!`;
-    speakText(`Oops! The answer is ${correct}. ${correct} is for ${L.w}. Keep trying!`,()=>{setState('idle');});
+    const bs = document.getElementById('buddySays');
+    if(bs) bs.textContent = t('wrongAnswer', correct, L.w);
+    speakText(t('speakWrong', correct, L.w), () => setState('idle'));
   }
-  const nb=document.getElementById('nextBtn');if(nb) nb.disabled=false;
+  const nb = document.getElementById('nextBtn');
+  if(nb) nb.disabled = false;
 }
 
-// ═══════════════════════════════════════════════════
-//  CHAT PANEL
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CHAT PANEL
+// ═══════════════════════════════════════════════
 function showChatPanel(){
-  document.getElementById('topTitle').textContent='💬 Chat with Buddy';
-  document.getElementById('topSub').textContent='Ask Buddy anything about letters!';
-  document.getElementById('lesson-panel').innerHTML=`<div class="chat-wrap" id="chatWrap"></div>`;
-  addChatMsg(`Hi there! 👋 I'm Buddy your teddy bear tutor! 🐻 Ask me about any letter, phonics sound, or just say hello! You can also tap the mic to speak! 🎙️`,'b');
+  document.getElementById('topTitle').textContent = t('chatTitle');
+  document.getElementById('topSub').textContent = t('chatSub');
+  document.getElementById('lesson-panel').innerHTML = `<div class="chat-wrap" id="chatWrap"></div>`;
+  addChatMsg(t('chatGreet'), 'b');
+  document.getElementById('buddyQuickMsg').textContent = t('chatSub');
 }
 
-function addChatMsg(text,role,html=''){
-  let wrap=document.getElementById('chatWrap');
-  if(!wrap){document.getElementById('lesson-panel').innerHTML='<div class="chat-wrap" id="chatWrap"></div>';wrap=document.getElementById('chatWrap');}
-  const id='m'+(++mc),now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),isB=role==='b';
-  const row=document.createElement('div');row.className='mr'+(isB?'':' u');row.id=id;
-  const av=document.createElement('div');av.className='mav'+(isB?'':' u');av.textContent=isB?'🐻':'👤';
-  const bub=document.createElement('div');bub.className='bub '+(isB?'b':'u');
-  if(html)bub.innerHTML=html;else bub.textContent=text;
-  const mt=document.createElement('div');mt.className='mt';mt.textContent=now;
-  const mw=document.createElement('div');mw.className='mw'+(isB?'':' u');
-  mw.appendChild(bub);mw.appendChild(mt);row.appendChild(av);row.appendChild(mw);
-  wrap.appendChild(row);document.getElementById('lesson-panel').scrollTop=99999;return id;
+function addChatMsg(text, role, html=''){
+  let wrap = document.getElementById('chatWrap');
+  if(!wrap){ document.getElementById('lesson-panel').innerHTML='<div class="chat-wrap" id="chatWrap"></div>'; wrap=document.getElementById('chatWrap'); }
+  const id='m'+(++mc), now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}), isB=role==='b';
+  const row=document.createElement('div'); row.className='mr'+(isB?'':' u'); row.id=id;
+  const av=document.createElement('div'); av.className='mav'+(isB?'':' u'); av.textContent=isB?'🐻':'👤';
+  const bub=document.createElement('div'); bub.className='bub '+(isB?'b':'u');
+  if(html) bub.innerHTML=html; else bub.textContent=text;
+  const mt=document.createElement('div'); mt.className='mt'; mt.textContent=now;
+  const mw=document.createElement('div'); mw.className='mw'+(isB?'':' u');
+  mw.appendChild(bub); mw.appendChild(mt); row.appendChild(av); row.appendChild(mw);
+  wrap.appendChild(row);
+  document.getElementById('lesson-panel').scrollTop=99999;
+  return id;
 }
-function removeMsg(id){document.getElementById(id)?.remove();}
+function removeMsg(id){ document.getElementById(id)?.remove(); }
 
-// ═══════════════════════════════════════════════════
-//  VOICE ENGINE
-// ═══════════════════════════════════════════════════
-function getFV(){
-  const vs=speechSynthesis.getVoices();
-  for(const n of['Samantha','Karen','Moira','Victoria','Tessa','Google US English','Microsoft Aria Online','Microsoft Zira']){const v=vs.find(x=>x.name.includes(n));if(v)return v;}
-  return vs.find(v=>/en/i.test(v.lang))||vs[0]||null;
+// ═══════════════════════════════════════════════
+// VOICE ENGINE
+// ═══════════════════════════════════════════════
+function getFV(langCode){
+  const vs = speechSynthesis.getVoices();
+  if(langCode === 'zh-CN') {
+    const zh = vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /zh/i.test(v.lang));
+    if(zh) return zh;
+  }
+  if(langCode === 'hi-IN') {
+    const hi = vs.find(v => /hi[-_]IN/i.test(v.lang)) || vs.find(v => /hi/i.test(v.lang));
+    if(hi) return hi;
+  }
+  for(const n of['Samantha','Karen','Moira','Victoria','Google US English','Microsoft Aria']){
+    const v = vs.find(x => x.name.includes(n));
+    if(v) return v;
+  }
+  return vs.find(v => /en/i.test(v.lang)) || vs[0] || null;
 }
-function speakText(text,onEnd){
-  if(!('speechSynthesis'in window)){setState('idle');onEnd&&onEnd();return;}
+
+function speakText(text, onEnd){
+  if(!('speechSynthesis' in window)){ setState('idle'); onEnd&&onEnd(); return; }
   speechSynthesis.cancel();
-  const clean=text.replace(/[\uD800-\uDFFF]|[\u2600-\u27FF]|[\u{1F000}-\u{1FFFF}]/gu,' ')
-    .replace(/[^\w\s,.!?'"%-]/g,' ').replace(/\s+/g,' ').trim().slice(0,400);
-  if(!clean){setState('idle');onEnd&&onEnd();return;}
-  const go=()=>{
-    const u=new SpeechSynthesisUtterance(clean);
-    const v=getFV();if(v)u.voice=v;
-    u.rate=.82;u.pitch=1.15;u.volume=1;
-    u.onstart=()=>setState('speaking');
-    u.onend=()=>{setState('idle');onEnd&&onEnd();};
-    u.onerror=()=>{setState('idle');onEnd&&onEnd();};
+  const langCode = LANG[currentLang].voiceLang;
+  // For Chinese/Hindi, don't strip non-ASCII chars
+  let clean;
+  if(currentLang === 'en') {
+    clean = text.replace(/[\uD800-\uDFFF]|[\u2600-\u27FF]|[\u{1F000}-\u{1FFFF}]/gu,' ')
+      .replace(/[^\w\s,.!?'"%-]/g,' ').replace(/\s+/g,' ').trim().slice(0,400);
+  } else {
+    clean = text.replace(/[\uD800-\uDFFF]/g,' ')
+      .replace(/[\u2600-\u27FF]/g,' ')
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu,' ')
+      .replace(/\s+/g,' ').trim().slice(0,400);
+  }
+  if(!clean){ setState('idle'); onEnd&&onEnd(); return; }
+  const go = () => {
+    const u = new SpeechSynthesisUtterance(clean);
+    const v = getFV(langCode); if(v) u.voice=v;
+    u.lang = langCode;
+    u.rate = currentLang==='zh'?.9:currentLang==='hi'?.85:.82;
+    u.pitch = 1.12; u.volume = 1;
+    u.onstart = () => setState('speaking');
+    u.onend = () => { setState('idle'); onEnd&&onEnd(); };
+    u.onerror = () => { setState('idle'); onEnd&&onEnd(); };
     speechSynthesis.speak(u);
   };
-  setTimeout(()=>{
+  setTimeout(() => {
     speechSynthesis.getVoices().length===0
-      ?speechSynthesis.onvoiceschanged=(()=>{go();speechSynthesis.onvoiceschanged=null;})
-      :go();
-  },80);
+      ? (speechSynthesis.onvoiceschanged=()=>{ go(); speechSynthesis.onvoiceschanged=null; })
+      : go();
+  }, 80);
 }
 
-// ═══════════════════════════════════════════════════
-//  MIC PERMISSION
-// ═══════════════════════════════════════════════════
-let micPermissionGranted=false;
+// ═══════════════════════════════════════════════
+// MIC
+// ═══════════════════════════════════════════════
+let micPermissionGranted = false;
 
 async function initMicPermission(){
   if(navigator.permissions){
     try{
-      const s=await navigator.permissions.query({name:'microphone'});
-      if(s.state==='granted'){micPermissionGranted=true;hideMicModal();return;}
-      if(s.state==='denied'){showBlockedInstructions();return;}
-      showMicModal();return;
+      const s = await navigator.permissions.query({name:'microphone'});
+      if(s.state==='granted'){ micPermissionGranted=true; hideMicModal(); return; }
+      if(s.state==='denied'){ showBlockedInstructions(); return; }
+      showMicModal(); return;
     }catch(e){}
   }
   showMicModal();
 }
-
-function showMicModal(){const m=document.getElementById('micModal');m.style.display='flex';}
-function hideMicModal(){document.getElementById('micModal').style.display='none';}
-function dismissMicModal(){hideMicModal();micToast('💬 No problem! Use the text box to chat with Buddy.','#6BCB77');}
-
+function showMicModal(){ document.getElementById('micModal').style.display='flex'; }
+function hideMicModal(){ document.getElementById('micModal').style.display='none'; }
+function dismissMicModal(){ hideMicModal(); micToast('💬 No mic? Use the text box!','#6BCB77'); }
 function showBlockedInstructions(){
-  const modal=document.getElementById('micModal');
+  const modal = document.getElementById('micModal');
   modal.style.display='flex';
-  modal.querySelector('div > div').innerHTML=`
-    <div style="font-size:48px;margin-bottom:12px;">🔒</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:22px;color:#FF6B6B;margin-bottom:10px;">Microphone is blocked</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:20px;text-align:left;">
-      Chrome remembered <strong style="color:#FFD93D">Block</strong> for this site.<br><br>
+  modal.querySelector('.modal-box').innerHTML=`
+    <div style="font-size:44px;margin-bottom:10px;">🔒</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#FF6B6B;margin-bottom:8px;">Microphone is blocked</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.7;margin-bottom:18px;text-align:left;">
       <strong style="color:#fff">1.</strong> Click the <strong style="color:#FFD93D">🔒 lock icon</strong> in your address bar<br>
-      <strong style="color:#fff">2.</strong> Find <strong style="color:#FFD93D">Microphone</strong> → change to <strong style="color:#4ade80">Allow</strong><br>
+      <strong style="color:#fff">2.</strong> Find <strong style="color:#FFD93D">Microphone</strong> → Allow<br>
       <strong style="color:#fff">3.</strong> <strong style="color:#FFD93D">Refresh this page</strong>
     </div>
-    <button onclick="location.reload()" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;margin-bottom:10px;">🔄 Refresh Page</button>
-    <button onclick="dismissMicModal()" style="width:100%;padding:10px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;">Skip — I'll type instead</button>`;
+    <button onclick="location.reload()" class="modal-allow" style="background:linear-gradient(135deg,#4ade80,#16a34a);">🔄 Refresh Page</button>
+    <button onclick="dismissMicModal()" class="modal-skip">Skip — I'll type instead</button>`;
 }
-
 async function requestMicPermission(){
-  const status=document.getElementById('micModalStatus');
-  status.textContent='Asking Chrome for permission…';status.style.color='#FFD93D';
+  const status = document.getElementById('micModalStatus');
+  status.textContent = 'Asking for permission…'; status.style.color='#FFD93D';
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    stream.getTracks().forEach(t=>t.stop());
-    micPermissionGranted=true;
-    status.textContent='✅ Microphone allowed!';status.style.color='#4ade80';
-    setTimeout(hideMicModal,800);
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    stream.getTracks().forEach(t2=>t2.stop());
+    micPermissionGranted = true;
+    status.textContent = '✅ Microphone allowed!'; status.style.color='#4ade80';
+    setTimeout(hideMicModal, 700);
   }catch(err){
-    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){showBlockedInstructions();}
-    else if(err.name==='NotFoundError'){status.textContent='❌ No microphone found!';status.style.color='#FF6B6B';}
-    else{status.textContent='Error: '+err.message;status.style.color='#FF6B6B';}
+    if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError') showBlockedInstructions();
+    else { status.textContent = 'Error: '+err.message; status.style.color='#FF6B6B'; }
   }
 }
-
-function micToast(msg,color='#FF6B6B'){
-  let t=document.getElementById('micToast');
-  if(!t){t=document.createElement('div');t.id='micToast';
-    t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 22px;border-radius:14px;font-family:Nunito,sans-serif;font-size:13.5px;font-weight:700;color:#fff;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
-    document.body.appendChild(t);}
-  t.style.background=color;t.style.opacity='1';t.textContent=msg;
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.opacity='0',3500);
+function micToast(msg, color='#FF6B6B'){
+  let t2=document.getElementById('micToast');
+  if(!t2){t2=document.createElement('div');t2.id='micToast';
+    t2.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 20px;border-radius:12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:#fff;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
+    document.body.appendChild(t2);}
+  t2.style.background=color; t2.style.opacity='1'; t2.textContent=msg;
+  clearTimeout(t2._timer); t2._timer=setTimeout(()=>t2.style.opacity='0',3500);
 }
 
 function toggleListen(){
-  if(isListening){stopListen();return;}
+  if(isListening){ stopListen(); return; }
   if(!micPermissionGranted){
     if(navigator.permissions){
       navigator.permissions.query({name:'microphone'}).then(s=>{
-        if(s.state==='denied'){showBlockedInstructions();showMicModal();}
-        else if(s.state==='prompt'){showMicModal();}
-        else{micPermissionGranted=true;startListen();}
+        if(s.state==='denied'){ showBlockedInstructions(); showMicModal(); }
+        else if(s.state==='prompt') showMicModal();
+        else { micPermissionGranted=true; startListen(); }
       }).catch(()=>startListen());
-    }else{startListen();}
+    }else startListen();
     return;
   }
   startListen();
@@ -983,116 +1246,144 @@ function toggleListen(){
 
 function startListen(){
   speechSynthesis.cancel();
-  if(recog){try{recog.abort();}catch(e){}recog=null;}
-  setState('listening');isListening=true;let gotResult=false,retries=0;
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(recog){ try{recog.abort();}catch(e){} recog=null; }
+  setState('listening'); isListening=true; let gotResult=false, retries=0;
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ micToast('🎙️ Speech recognition not supported in this browser.'); stopListen(); return; }
   function doStart(){
-    recog=new SR();recog.continuous=false;recog.interimResults=true;recog.lang='en-US';recog.maxAlternatives=3;
-    recog.onstart=()=>{showLiveT('Listening… speak now!');};
+    recog=new SR(); recog.continuous=false; recog.interimResults=true;
+    recog.lang = LANG[currentLang].voiceLang;
+    recog.maxAlternatives=3;
+    recog.onstart=()=>{ showLiveT(t('listening')+'…'); };
     recog.onresult=e=>{
       let interim='',final='';
-      for(const r of e.results){if(r.isFinal)final+=r[0].transcript;else interim+=r[0].transcript;}
+      for(const r of e.results){ if(r.isFinal) final+=r[0].transcript; else interim+=r[0].transcript; }
       showLiveT(final||interim);
-      if(final){gotResult=true;stopListen();handleVoiceInput(final.trim());}
+      if(final){ gotResult=true; stopListen(); handleVoiceInput(final.trim()); }
     };
-    recog.onspeechend=()=>{setTimeout(()=>{if(!gotResult&&recog)recog.stop();},300);};
+    recog.onspeechend=()=>{ setTimeout(()=>{ if(!gotResult&&recog) recog.stop(); },300); };
     recog.onerror=e=>{
-      if(e.error==='no-speech'){if(retries<1){retries++;showLiveT('I didn\'t hear you — try again!');setTimeout(doStart,400);return;}stopListen();micToast('🎙️ I didn\'t hear anything. Try again!','#6BCB77');return;}
+      if(e.error==='no-speech'){ if(retries<1){ retries++; setTimeout(doStart,400); return; } stopListen(); micToast('🎙️ I didn\'t hear you. Try again!','#6BCB77'); return; }
       stopListen();
-      if(e.error==='not-allowed'||e.error==='service-not-allowed'){micPermissionGranted=false;showBlockedInstructions();showMicModal();return;}
-      const msgs={'not-found':'🎙️ No microphone found.','network':'🌐 Network error.','aborted':'','audio-capture':'🎙️ Mic is used by another app.'};
-      const msg=msgs[e.error];if(msg)micToast(msg);
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){ micPermissionGranted=false; showBlockedInstructions(); showMicModal(); return; }
     };
-    recog.onend=()=>{if(!gotResult&&isListening){if(retries<1){retries++;setTimeout(doStart,300);}else{stopListen();}}};
-    try{recog.start();}catch(err){stopListen();}
+    recog.onend=()=>{ if(!gotResult&&isListening){ if(retries<1){ retries++; setTimeout(doStart,300); }else stopListen(); } };
+    try{ recog.start(); }catch(err){ stopListen(); }
   }
   doStart();
 }
 
 function stopListen(){
-  isListening=false;if(recog){try{recog.abort();}catch(e){}recog=null;}
-  showLiveT('');if(A.state==='listening')setState('idle');
+  isListening=false; if(recog){ try{recog.abort();}catch(e){} recog=null; }
+  showLiveT(''); if(A.state==='listening') setState('idle');
 }
-function showLiveT(t){const el=document.getElementById('liveT'),tx=document.getElementById('ltText');if(t){el.classList.add('show');tx.textContent=t;}else el.classList.remove('show');}
+function showLiveT(t2){
+  const el=document.getElementById('liveT'),tx=document.getElementById('ltText');
+  document.querySelector('.lt-lbl').textContent = t('youSaid');
+  if(t2){ el.classList.add('show'); tx.textContent=t2; }else el.classList.remove('show');
+}
 
 async function handleVoiceInput(text){
-  const upper=text.trim().toUpperCase();const lower=text.trim().toLowerCase();
+  const lower = text.trim().toLowerCase();
   if(mode==='quiz'&&!answered){
-    const spokenLetter=extractLetter(text);
+    const spokenLetter = extractLetter(text);
     if(spokenLetter){
-      const L=LETTERS[curIdx];
-      const btns=[...document.querySelectorAll('.choice')];
-      const matchBtn=btns.find(b=>b.textContent.trim()===spokenLetter);
-      if(matchBtn){checkAnswer(spokenLetter,L.l,matchBtn);return;}
+      const L = LETTERS[curIdx];
+      const btns = [...document.querySelectorAll('.choice')];
+      const matchBtn = btns.find(b=>b.textContent.trim()===spokenLetter);
+      if(matchBtn){ checkAnswer(spokenLetter, L.l, matchBtn); return; }
     }
   }
   if(mode==='learn'){
-    const spokenLetter=extractLetter(text);
+    const spokenLetter = extractLetter(text);
     if(spokenLetter){
-      const idx=LETTERS.findIndex(x=>x.l===spokenLetter);
-      if(idx>=0){selectLetter(idx);const L=LETTERS[idx];setTimeout(()=>speakText(`Yes! ${L.l}! ${L.l} is for ${L.w}! Great job!`,()=>{}),400);return;}
+      const idx = LETTERS.findIndex(x=>x.l===spokenLetter);
+      if(idx>=0){ selectLetter(idx); const L=LETTERS[idx]; setTimeout(()=>speakText(`Yes! ${L.l}! ${L.l} is for ${L.w}!`,()=>{}),400); return; }
     }
-    const wordMatch=LETTERS.find(x=>lower.includes(x.w.toLowerCase()));
-    if(wordMatch){const idx=LETTERS.indexOf(wordMatch);selectLetter(idx);setTimeout(()=>speakText(`${wordMatch.w}! That starts with ${wordMatch.l}! Amazing!`,()=>{}),400);return;}
+    const wordMatch = LETTERS.find(x=>lower.includes(x.w.toLowerCase()));
+    if(wordMatch){ const idx=LETTERS.indexOf(wordMatch); selectLetter(idx); setTimeout(()=>speakText(`${wordMatch.w}! That starts with ${wordMatch.l}!`,()=>{}),400); return; }
   }
-  if(mode!=='chat')setMode('chat');
-  addChatMsg(text,'u');showLiveT('');setState('thinking');
-  const lid=addChatMsg('','b','<div class="dl-wrap"><div class="dl"></div><div class="dl"></div><div class="dl"></div></div>');
-  const API_KEY='Killer';
-  if(!API_KEY||API_KEY==='Killer'){
+  if(mode!=='chat') setMode('chat');
+  addChatMsg(text,'u'); showLiveT(''); setState('thinking');
+  const lid = addChatMsg('','b','<div class="dl-wrap"><div class="dl"></div><div class="dl"></div><div class="dl"></div></div>');
+  const API_KEY = 'YOUR_API_KEY_HERE';
+  if(!API_KEY||API_KEY==='YOUR_API_KEY_HERE'){
     removeMsg(lid);
-    const fb=`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
-    addChatMsg('💡 Add your Anthropic API key to enable AI chat! For now: '+fb,'b');
-    speakText(fb,()=>{});return;
+    const fb = `${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;
+    addChatMsg(t('addAPIKey')+fb,'b');
+    speakText(fb,()=>{}); return;
   }
+  const sysPrompt = currentLang==='hi'
+    ? `आप बडी हैं, 3-8 साल के बच्चों के लिए एक दोस्ताना टेडी बियर शिक्षक। A-Z अक्षर और ध्वनि सिखाएं। जवाब छोटा रखें (2-3 वाक्य)। सरल हिंदी में जवाब दें। हमेशा उत्साहजनक रहें।`
+    : currentLang==='zh'
+    ? `你是巴迪，一个为3-8岁儿童服务的友好泰迪熊老师。教授A-Z字母和自然拼读。回答要简短（2-3句话）。用简单的中文回答。永远保持鼓励的态度。`
+    : `You are Buddy, a friendly teddy bear tutor for kids aged 3-8. Teach A-Z alphabets and phonics. Keep answers SHORT (2-3 sentences). Very simple words only. Always warm and encouraging!`;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-iab':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:`You are Buddy, a friendly teddy bear tutor for kids aged 3-8. Teach A-Z alphabets and phonics.\n- Keep answers SHORT (2-3 sentences). Very simple words only.\n- Always warm, encouraging, and fun!\n- For phonics questions, explain short and long sounds simply\n- End with a fun question or encouragement\n- No markdown, no bullet points — plain speech only`,messages:[{role:'user',content:text}]})});
-    const d=await r.json();removeMsg(lid);
-    const reply=d.content?.[0]?.text||`Great question! ${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}!`;
-    addChatMsg(reply,'b');speakText(reply,()=>{});
-  }catch(e){removeMsg(lid);const fb=`${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}! Can you say ${LETTERS[curIdx].l}?`;addChatMsg(fb,'b');speakText(fb,()=>{});}
+    const r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-iab':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:sysPrompt,messages:[{role:'user',content:text}]})
+    });
+    const d = await r.json(); removeMsg(lid);
+    const reply = d.content?.[0]?.text || `${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}!`;
+    addChatMsg(reply,'b'); speakText(reply,()=>{});
+  }catch(e){
+    removeMsg(lid);
+    const fb = `${LETTERS[curIdx].l} is for ${LETTERS[curIdx].w}!`;
+    addChatMsg(fb,'b'); speakText(fb,()=>{});
+  }
 }
 
 function extractLetter(text){
-  const upper=text.trim().toUpperCase();
-  if(/^[A-Z]$/.test(upper))return upper;
-  const m1=upper.match(/\bLETTER\s+([A-Z])\b/);if(m1)return m1[1];
-  const m2=upper.match(/\b(?:IS|IT'S|ITS|THINK|ANSWER|CHOOSE|PICK|SAY)\s+([A-Z])\b/);if(m2)return m2[1];
-  const phonetic={'AY':'A','BEE':'B','CEE':'C','DEE':'D','EE':'E','EF':'F','GEE':'G','HI':'H','AITCH':'H','EYE':'I','JAY':'J','KAY':'K','EL':'L','EM':'M','EN':'N','OH':'O','PEE':'P','CUE':'Q','QUE':'Q','AR':'R','ESS':'S','TEE':'T','YOU':'U','VEE':'V','WE':'W','EX':'X','WHY':'Y','ZEE':'Z','ZED':'Z'};
-  const words=upper.replace(/[^A-Z\s]/g,'').trim().split(/\s+/);
-  if(words.length===1&&phonetic[words[0]])return phonetic[words[0]];
-  const last=words[words.length-1];
-  if(/^[A-Z]$/.test(last))return last;
-  if(phonetic[last])return phonetic[last];
+  const upper = text.trim().toUpperCase();
+  if(/^[A-Z]$/.test(upper)) return upper;
+  const m1 = upper.match(/\bLETTER\s+([A-Z])\b/); if(m1) return m1[1];
+  const m2 = upper.match(/\b(?:IS|IT'S|THINK|ANSWER|CHOOSE|PICK|SAY)\s+([A-Z])\b/); if(m2) return m2[1];
+  const phonetic={'AY':'A','BEE':'B','CEE':'C','DEE':'D','EE':'E','EF':'F','GEE':'G','HI':'H','AITCH':'H','EYE':'I','JAY':'J','KAY':'K','EL':'L','EM':'M','EN':'N','OH':'O','PEE':'P','CUE':'Q','AR':'R','ESS':'S','TEE':'T','YOU':'U','VEE':'V','WE':'W','EX':'X','WHY':'Y','ZEE':'Z','ZED':'Z'};
+  const words = upper.replace(/[^A-Z\s]/g,'').trim().split(/\s+/);
+  if(words.length===1&&phonetic[words[0]]) return phonetic[words[0]];
+  const last = words[words.length-1];
+  if(/^[A-Z]$/.test(last)) return last;
+  if(phonetic[last]) return phonetic[last];
   return null;
 }
 
-function sendText(){const inp=document.getElementById('ci'),t=inp.value.trim();if(!t)return;inp.value='';handleVoiceInput(t);}
-document.getElementById('ci').addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
-function prevLetter(){selectLetter(Math.max(0,curIdx-1));}
-function nextLetter(){selectLetter(Math.min(25,curIdx+1));}
-function clearChat(){if(mode==='chat')showChatPanel();else if(mode==='learn')showLearnPanel();else showQuizPanel();}
+function sendText(){
+  const inp=document.getElementById('ci'), t3=inp.value.trim();
+  if(!t3) return;
+  inp.value='';
+  handleVoiceInput(t3);
+}
+document.getElementById('ci').addEventListener('keydown', e => { if(e.key==='Enter') sendText(); });
+function prevLetter(){ selectLetter(Math.max(0,curIdx-1)); }
+function nextLetter(){ selectLetter(Math.min(25,curIdx+1)); }
+function clearPanel(){ if(mode==='learn') showLearnPanel(); else if(mode==='quiz') showQuizPanel(); else showChatPanel(); }
 
 function confetti(){
   const colors=['#FFD93D','#FF6B6B','#6BCB77','#6EC6F5','#c77dff'];
   for(let i=0;i<18;i++){
     const el=document.createElement('div');
     el.style.cssText=`position:fixed;left:${Math.random()*100}%;top:-10px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*5)]};border-radius:${Math.random()>.5?'50%':'2px'};animation:fall ${.8+Math.random()*1.2}s linear ${Math.random()*.4}s forwards;z-index:999;pointer-events:none;`;
-    document.body.appendChild(el);setTimeout(()=>el.remove(),2500);
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),2500);
   }
 }
-if(!document.getElementById('fallStyle')){const s=document.createElement('style');s.id='fallStyle';s.textContent='@keyframes fall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}';document.head.appendChild(s);}
+if(!document.getElementById('fallStyle')){
+  const s=document.createElement('style'); s.id='fallStyle';
+  s.textContent='@keyframes fall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}';
+  document.head.appendChild(s);
+}
 
 window.addEventListener('load',()=>{
-  // Wire modal buttons safely after DOM is ready
   document.getElementById('modalAllowBtn')?.addEventListener('click', requestMicPermission);
   document.getElementById('modalSkipBtn')?.addEventListener('click', dismissMicModal);
   initMicPermission();
   setState('greeting');
   showLearnPanel();
   setTimeout(()=>{
-    speakText(`Hello! I'm Buddy your teddy bear teacher! Let's learn the alphabet together! Today we start with the letter ${LETTERS[0].l}! ${LETTERS[0].l} is for ${LETTERS[0].w}! Tap any sound card to hear the phonics! Tap the mic to speak!`,()=>{});
-  },700);
+    const L = LETTERS[0];
+    speakText(t('speakGreet', L.l, L.w), ()=>{});
+  }, 700);
 });
 </script>
 </body>
